@@ -1,7 +1,7 @@
 {
-  "name": "eth-simple-keyring",
+  "name": "eth-hd-keyring",
   "version": "1.1.1",
-  "description": "A simple standard interface for a series of Ethereum private keys.",
+  "description": "A simple standard interface for a seed phrase generated set of Ethereum accounts.",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
