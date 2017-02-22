@@ -151,6 +151,59 @@ describe('hd-keyring', function() {
         done()
       })
       .catch((reason) => {
+        console.error('failed because', reason)
+      })
+    })
+  })
+
+  describe('custom hd paths', function () {
+
+    it('can deserialize with an hdPath param and generate the same accounts.', function (done) {
+      const hdPathString = `m/44'/60'/0'/0`
+      const sampleMnemonic = 'finish oppose decorate face calm tragic certain desk hour urge dinosaur mango'
+
+      keyring.deserialize({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+        hdPath: hdPathString,
+      })
+      .then(() => {
+        return keyring.getAccounts()
+      })
+      .then((addresses) => {
+        assert.equal(addresses[0], firstAcct)
+        return keyring.serialize()
+      })
+      .then((serialized) => {
+        assert.equal(serialized.hdPath, hdPathString)
+        done()
+      })
+      .catch((reason) => {
+        console.error('failed because', reason)
+      })
+    })
+
+    it('can deserialize with an hdPath param and generate different accounts.', function (done) {
+      const hdPathString = `m/44'/60'/0'/1`
+      const sampleMnemonic = 'finish oppose decorate face calm tragic certain desk hour urge dinosaur mango'
+
+      keyring.deserialize({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+        hdPath: hdPathString,
+      })
+      .then(() => {
+        return keyring.getAccounts()
+      })
+      .then((addresses) => {
+        assert.notEqual(addresses[0], firstAcct)
+        return keyring.serialize()
+      })
+      .then((serialized) => {
+        assert.equal(serialized.hdPath, hdPathString)
+        done()
+      })
+      .catch((reason) => {
         console.log('failed because', reason)
       })
     })

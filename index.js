@@ -22,6 +22,7 @@ class HdKeyring extends EventEmitter {
     return Promise.resolve({
       mnemonic: this.mnemonic,
       numberOfAccounts: this.wallets.length,
+      hdPath: this.hdPath,
     })
   }
 
@@ -30,6 +31,7 @@ class HdKeyring extends EventEmitter {
     this.wallets = []
     this.mnemonic = null
     this.root = null
+    this.hdPath = opts.hdPath || hdPathString
 
     if (opts.mnemonic) {
       this._initFromMnemonic(opts.mnemonic)
@@ -114,7 +116,7 @@ class HdKeyring extends EventEmitter {
     this.mnemonic = mnemonic
     const seed = bip39.mnemonicToSeed(mnemonic)
     this.hdWallet = hdkey.fromMasterSeed(seed)
-    this.root = this.hdWallet.derivePath(hdPathString)
+    this.root = this.hdWallet.derivePath(this.hdPath)
   }
 
 
