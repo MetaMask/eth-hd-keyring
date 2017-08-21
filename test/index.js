@@ -208,4 +208,34 @@ describe('hd-keyring', function() {
       })
     })
   })
+
+  describe('create and restore 1k accounts', function () {
+    it('should restore same accounts with no problem', async function () {
+      this.timeout(20000)
+
+      for (let i = 0; i < 1e3; i++) {
+
+        keyring = new HdKeyring({
+          numberOfAccounts: 1,
+        })
+        const originalAccounts = await keyring.getAccounts()
+        const serialized = await keyring.serialize()
+        const mnemonic = serialized.mnemonic
+
+        keyring = new HdKeyring({
+          numberOfAccounts: 1,
+          mnemonic,
+        })
+        const restoredAccounts = await keyring.getAccounts()
+
+        const first = originalAccounts[0]
+        const restored = restoredAccounts[0]
+        const msg = `Should restore same account from mnemonic: "${mnemonic}"`
+        assert.equal(restoredAccounts[0], originalAccounts[0], msg)
+
+      }
+
+      return true
+    })
+  })
 })
