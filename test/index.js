@@ -156,6 +156,30 @@ describe('hd-keyring', function() {
     })
   })
 
+  describe('#signTypedData', function () {
+    it('returns the expected value', function (done) {
+      const address = firstAcct
+      const privateKey = Buffer.from(privKeyHex, 'hex')
+      const typedData = [
+        {
+          type: 'string',
+          name: 'message',
+          value: 'Hi, Alice!'
+        }
+      ]
+
+      keyring.deserialize({ mnemonic: sampleMnemonic, numberOfAccounts: 1 }).then(function () {
+        return keyring.signTypedData(address, typedData)
+      }).then(function (sig) {
+        const restored = sigUtil.recoverTypedSignature({ data: typedData, sig: sig })
+        assert.equal(restored, sigUtil.normalize(address), 'recovered address')
+        done()
+      }).catch(function (reason) {
+        console.error('failed because', reason)
+      })
+    })
+  })
+
   describe('custom hd paths', function () {
 
     it('can deserialize with an hdPath param and generate the same accounts.', function (done) {

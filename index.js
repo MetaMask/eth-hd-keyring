@@ -93,6 +93,14 @@ class HdKeyring extends EventEmitter {
     return Promise.resolve(sig)
   }
 
+  // personal_signTypedData, signs data along with the schema
+  signTypedData (withAccount, typedData) {
+    const wallet = this._getWalletForAccount(withAccount)
+    const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
+    const signature = sigUtil.signTypedData(privKey, { data: typedData })
+    return Promise.resolve(signature)
+  }
+
   // For eth_sign, we need to sign transactions:
   newGethSignMessage (withAccount, msgHex) {
     const wallet = this._getWalletForAccount(withAccount)
