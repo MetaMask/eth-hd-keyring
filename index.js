@@ -57,12 +57,16 @@ class HdKeyring extends EventEmitter {
       newWallets.push(wallet)
       this.wallets.push(wallet)
     }
-    const hexWallets = newWallets.map(w => w.getAddress().toString('hex'))
+    const hexWallets = newWallets.map((w) => {
+      return sigUtil.normalize(w.getAddress().toString('hex'))
+    })
     return Promise.resolve(hexWallets)
   }
 
   getAccounts () {
-    return Promise.resolve(this.wallets.map(w => w.getAddress().toString('hex')))
+    return Promise.resolve(this.wallets.map((w) => {
+      return sigUtil.normalize(w.getAddress().toString('hex'))
+    }))
   }
 
   // tx is an instance of the ethereumjs-transaction class.
@@ -123,7 +127,7 @@ class HdKeyring extends EventEmitter {
   _getWalletForAccount (account) {
     const targetAddress = sigUtil.normalize(account)
     return this.wallets.find((w) => {
-      const address = w.getAddress().toString('hex')
+      const address = sigUtil.normalize(w.getAddress().toString('hex'))
       return ((address === targetAddress) ||
               (sigUtil.normalize(address) === targetAddress))
     })

@@ -7,8 +7,8 @@ const sigUtil = require('eth-sig-util')
 const privKeyHex = 'b8a9c05beeedb25df85f8d641538cbffedf67216048de9c678ee26260eb91952'
 
 const sampleMnemonic = 'finish oppose decorate face calm tragic certain desk hour urge dinosaur mango'
-const firstAcct = '1c96099350f13d558464ec79b9be4445aa0ef579'
-const secondAcct = '1b00aed43a693f3a957f9feb5cc08afa031e37a0'
+const firstAcct = '0x1c96099350f13d558464ec79b9be4445aa0ef579'
+const secondAcct = '0x1b00aed43a693f3a957f9feb5cc08afa031e37a0'
 
 describe('hd-keyring', function() {
 
@@ -18,16 +18,18 @@ describe('hd-keyring', function() {
   })
 
   describe('constructor', function(done) {
-    keyring = new HdKeyring({
-      mnemonic: sampleMnemonic,
-      numberOfAccounts: 2,
-    })
+    it('constructs', function (done) {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 2,
+      })
 
-    const accounts = keyring.getAccounts()
-    .then((accounts) => {
-      assert.equal(accounts[0], firstAcct)
-      assert.equal(accounts[1], secondAcct)
-      done()
+      const accounts = keyring.getAccounts()
+      .then((accounts) => {
+        assert.equal(accounts[0], firstAcct)
+        assert.equal(accounts[1], secondAcct)
+        done()
+      })
     })
   })
 
@@ -119,7 +121,7 @@ describe('hd-keyring', function() {
 
       const output = keyring.getAccounts()
       .then((output) => {
-        assert.equal(output[0], desiredOutput)
+        assert.equal(output[0], '0x' + desiredOutput)
         assert.equal(output.length, 1)
         done()
       })
