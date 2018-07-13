@@ -162,13 +162,14 @@ describe('hd-keyring', function() {
     it('returns the expected value', function (done) {
       const address = firstAcct
       const privateKey = Buffer.from(privKeyHex, 'hex')
-      const typedData = [
-        {
-          type: 'string',
-          name: 'message',
-          value: 'Hi, Alice!'
-        }
-      ]
+      const typedData = {
+        types: {
+          EIP712Domain: []
+        },
+        domain: {},
+        primaryType: 'EIP712Domain',
+        message: {}
+      }
 
       keyring.deserialize({ mnemonic: sampleMnemonic, numberOfAccounts: 1 }).then(function () {
         return keyring.signTypedData(address, typedData)
