@@ -71,7 +71,7 @@ class HdKeyring extends EventEmitter {
   }
 
   // tx is an instance of the ethereumjs-transaction class.
-  signTransaction (address, tx, opts) {
+  signTransaction (address, tx, opts = {}) {
     const wallet = this._getWalletForAccount(address, opts)
     var privKey = wallet.getPrivateKey()
     tx.sign(privKey)
@@ -80,7 +80,7 @@ class HdKeyring extends EventEmitter {
 
   // For eth_sign, we need to sign transactions:
   // hd
-  signMessage (withAccount, data, opts) {
+  signMessage (withAccount, data, opts = {}) {
     const wallet = this._getWalletForAccount(withAccount, opts)
     const message = ethUtil.stripHexPrefix(data)
     var privKey = wallet.getPrivateKey()
@@ -90,7 +90,7 @@ class HdKeyring extends EventEmitter {
   }
 
   // For personal_sign, we need to prefix the message:
-  signPersonalMessage (withAccount, msgHex, opts) {
+  signPersonalMessage (withAccount, msgHex, opts = {}) {
     const wallet = this._getWalletForAccount(withAccount, opts)
     const privKey = ethUtil.stripHexPrefix(wallet.getPrivateKey())
     const privKeyBuffer = new Buffer(privKey, 'hex')
@@ -99,7 +99,7 @@ class HdKeyring extends EventEmitter {
   }
 
   // personal_signTypedData, signs data along with the schema
-  signTypedData (withAccount, typedData, opts) {
+  signTypedData (withAccount, typedData, opts = {}) {
     const wallet = this._getWalletForAccount(withAccount, opts)
     const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
     const signature = sigUtil.signTypedData(privKey, { data: typedData })
@@ -107,7 +107,7 @@ class HdKeyring extends EventEmitter {
   }
 
   // For eth_sign, we need to sign transactions:
-  newGethSignMessage (withAccount, msgHex, opts) {
+  newGethSignMessage (withAccount, msgHex, opts = {}) {
     const wallet = this._getWalletForAccount(withAccount, opts)
     const privKey = wallet.getPrivateKey()
     const msgBuffer = ethUtil.toBuffer(msgHex)
@@ -142,7 +142,7 @@ class HdKeyring extends EventEmitter {
   }
 
 
-  _getWalletForAccount (account, opts) {
+  _getWalletForAccount (account, opts = {}) {
     const targetAddress = sigUtil.normalize(account)
 
     let wallet = this.wallets.find((w) => {
