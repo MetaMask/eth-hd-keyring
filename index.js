@@ -1,5 +1,6 @@
 const EventEmitter = require('events').EventEmitter
 const hdkey = require('ethereumjs-wallet/hdkey')
+const Wallet = require('ethereumjs-wallet')
 const bip39 = require('bip39')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
@@ -70,8 +71,8 @@ class HdKeyring extends EventEmitter {
   }
 
   // tx is an instance of the ethereumjs-transaction class.
-  signTransaction (address, tx) {
-    const wallet = this._getWalletForAccount(address)
+  signTransaction (address, tx, opts) {
+    const wallet = this._getWalletForAccount(address, opts)
     var privKey = wallet.getPrivateKey()
     tx.sign(privKey)
     return Promise.resolve(tx)
@@ -79,8 +80,8 @@ class HdKeyring extends EventEmitter {
 
   // For eth_sign, we need to sign transactions:
   // hd
-  signMessage (withAccount, data) {
-    const wallet = this._getWalletForAccount(withAccount)
+  signMessage (withAccount, data, opts) {
+    const wallet = this._getWalletForAccount(withAccount, opts)
     const message = ethUtil.stripHexPrefix(data)
     var privKey = wallet.getPrivateKey()
     var msgSig = ethUtil.ecsign(new Buffer(message, 'hex'), privKey)
@@ -89,8 +90,8 @@ class HdKeyring extends EventEmitter {
   }
 
   // For personal_sign, we need to prefix the message:
-  signPersonalMessage (withAccount, msgHex) {
-    const wallet = this._getWalletForAccount(withAccount)
+  signPersonalMessage (withAccount, msgHex, opts) {
+    const wallet = this._getWalletForAccount(withAccount, opts)
     const privKey = ethUtil.stripHexPrefix(wallet.getPrivateKey())
     const privKeyBuffer = new Buffer(privKey, 'hex')
     const sig = sigUtil.personalSign(privKeyBuffer, { data: msgHex })
@@ -98,22 +99,31 @@ class HdKeyring extends EventEmitter {
   }
 
   // personal_signTypedData, signs data along with the schema
-  signTypedData (withAccount, typedData) {
-    const wallet = this._getWalletForAccount(withAccount)
+  signTypedData (withAccount, typedData, opts) {
+    const wallet = this._getWalletForAccount(withAccount, opts)
     const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
     const signature = sigUtil.signTypedData(privKey, { data: typedData })
     return Promise.resolve(signature)
   }
 
   // For eth_sign, we need to sign transactions:
-  newGethSignMessage (withAccount, msgHex) {
-    const wallet = this._getWalletForAccount(withAccount)
+  newGethSignMessage (withAccount, msgHex, opts) {
+    const wallet = this._getWalletForAccount(withAccount, opts)
     const privKey = wallet.getPrivateKey()
     const msgBuffer = ethUtil.toBuffer(msgHex)
     const msgHash = ethUtil.hashPersonalMessage(msgBuffer)
     const msgSig = ethUtil.ecsign(msgHash, privKey)
     const rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
     return Promise.resolve(rawMsgSig)
+  }
+
+  // returns an app key
+  getAppKeyAddress (address, origin) {
+    const wallet = this._getWalletForAccount(address, {
+      withAppKeyOrigin: origin,
+    })
+    const appKeyAddress = wallet.getAddress()
+    return Promise.resolve(appKeyAddress)
   }
 
   exportAccount (address) {
@@ -132,13 +142,22 @@ class HdKeyring extends EventEmitter {
   }
 
 
-  _getWalletForAccount (account) {
+  _getWalletForAccount (account, opts) {
     const targetAddress = sigUtil.normalize(account)
-    return this.wallets.find((w) => {
+
+    let wallet = this.wallets.find((w) => {
       const address = sigUtil.normalize(w.getAddress().toString('hex'))
       return ((address === targetAddress) ||
               (sigUtil.normalize(address) === targetAddress))
     })
+
+    if (opts.withAppKeyOrigin) {
+      const privKey = wallet.getPrivateKey()
+      const appKeyPrivKey = ethUtil.keccak(privKey + opts.withAppKeyOrigin, 256)
+      wallet = Wallet.fromPrivateKey(appKeyPrivKey)
+    }
+
+    return wallet
   }
 }
 
