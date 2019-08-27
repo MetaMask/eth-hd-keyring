@@ -159,7 +159,9 @@ class HdKeyring extends EventEmitter {
 
     if (opts.withAppKeyOrigin) {
       const privKey = wallet.getPrivateKey()
-      const appKeyPrivKey = ethUtil.keccak(privKey.toString('hex') + opts.withAppKeyOrigin, 256)
+      const appKeyOriginBuffer = Buffer.from(opts.withAppKeyOrigin, 'utf8')
+      const appKeyBuffer = Buffer.concat([privKey, appKeyOriginBuffer])
+      const appKeyPrivKey = ethUtil.keccak(appKeyBuffer, 256)
       wallet = Wallet.fromPrivateKey(appKeyPrivKey)
     }
 
