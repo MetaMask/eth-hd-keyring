@@ -329,7 +329,7 @@ describe('hd-keyring', function() {
       const address = firstAcct
       const message = '0x68656c6c6f20776f726c64'
 
-      const privateKeyBuffer = new Buffer('74d053779c3c04bc494ae9bf9d16584c29d84f44411c9841dca1262f824449f4', 'hex')
+      const privateKeyBuffer = new Buffer('c54ed52a54f1882c9ebf0e7f103d51bee2bc8c96dff82972bfbcb857e76afc03', 'hex')
       const expectedSig = sigUtil.personalSign(privateKeyBuffer, { data: message })
 
       keyring.deserialize({
@@ -362,7 +362,7 @@ describe('hd-keyring', function() {
         message: {}
       }
 
-      const privateKeyBuffer = new Buffer('74d053779c3c04bc494ae9bf9d16584c29d84f44411c9841dca1262f824449f4', 'hex')
+      const privateKeyBuffer = new Buffer('c54ed52a54f1882c9ebf0e7f103d51bee2bc8c96dff82972bfbcb857e76afc03', 'hex')
       const expectedSig = sigUtil.signTypedData(privateKeyBuffer, { data: typedData })
 
       keyring.deserialize({
