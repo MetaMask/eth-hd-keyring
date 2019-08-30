@@ -70,65 +70,10 @@ class HdKeyring extends SimpleKeyring {
     }))
   }
 
-  // tx is an instance of the ethereumjs-transaction class.
-  signTransaction (address, tx, opts = {}) {
-    const wallet = this._getWalletForAccount(address, opts)
-    var privKey = wallet.getPrivateKey()
-    tx.sign(privKey)
-    return Promise.resolve(tx)
-  }
-
-  // For eth_sign, we need to sign transactions:
-  // hd
-  signMessage (withAccount, data, opts = {}) {
-    const wallet = this._getWalletForAccount(withAccount, opts)
-    const message = ethUtil.stripHexPrefix(data)
-    var privKey = wallet.getPrivateKey()
-    var msgSig = ethUtil.ecsign(new Buffer(message, 'hex'), privKey)
-    var rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
-    return Promise.resolve(rawMsgSig)
-  }
-
-  // For personal_sign, we need to prefix the message:
-  signPersonalMessage (withAccount, msgHex, opts = {}) {
-    const wallet = this._getWalletForAccount(withAccount, opts)
-    const privKey = ethUtil.stripHexPrefix(wallet.getPrivateKey())
-    const privKeyBuffer = new Buffer(privKey, 'hex')
-    const sig = sigUtil.personalSign(privKeyBuffer, { data: msgHex })
-    return Promise.resolve(sig)
-  }
-
-  // For eth_sign, we need to sign transactions:
-  newGethSignMessage (withAccount, msgHex, opts = {}) {
-    const wallet = this._getWalletForAccount(withAccount, opts)
-    const privKey = wallet.getPrivateKey()
-    const msgBuffer = ethUtil.toBuffer(msgHex)
-    const msgHash = ethUtil.hashPersonalMessage(msgBuffer)
-    const msgSig = ethUtil.ecsign(msgHash, privKey)
-    const rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
-    return Promise.resolve(rawMsgSig)
-  }
-
-  // returns an app key
-  getAppKeyAddress (address, origin) {
-    return new Promise((resolve, reject) => {
-      try {
-        const wallet = this._getWalletForAccount(address, {
-          withAppKeyOrigin: origin,
-        })
-        const appKeyAddress = sigUtil.normalize(wallet.getAddress().toString('hex'))
-        return resolve(appKeyAddress)
-      } catch (e) {
-        return reject(e)
-      }
-    })
-  }
-
   exportAccount (address) {
     const wallet = this._getWalletForAccount(address)
     return Promise.resolve(wallet.getPrivateKey().toString('hex'))
   }
-
 
   /* PRIVATE METHODS */
 
