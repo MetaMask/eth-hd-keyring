@@ -1,6 +1,7 @@
 const EventEmitter = require('events').EventEmitter
 const hdkey = require('ethereumjs-wallet/hdkey')
 const Wallet = require('ethereumjs-wallet')
+const SimpleKeyring = require('eth-simple-keyring')
 const bip39 = require('bip39')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
@@ -9,10 +10,9 @@ const sigUtil = require('eth-sig-util')
 const hdPathString = `m/44'/60'/0'/0`
 const type = 'HD Key Tree'
 
-class HdKeyring extends EventEmitter {
+class HdKeyring extends SimpleKeyring {
 
   /* PUBLIC METHODS */
-
   constructor (opts = {}) {
     super()
     this.type = type
@@ -98,14 +98,6 @@ class HdKeyring extends EventEmitter {
     return Promise.resolve(sig)
   }
 
-  // personal_signTypedData, signs data along with the schema
-  signTypedData (withAccount, typedData, opts = {}) {
-    const wallet = this._getWalletForAccount(withAccount, opts)
-    const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
-    const signature = sigUtil.signTypedData(privKey, { data: typedData })
-    return Promise.resolve(signature)
-  }
-
   // For eth_sign, we need to sign transactions:
   newGethSignMessage (withAccount, msgHex, opts = {}) {
     const wallet = this._getWalletForAccount(withAccount, opts)
@@ -167,6 +159,16 @@ class HdKeyring extends EventEmitter {
 
     return wallet
   }
+
+  getPrivateKeyFor (address, opts = {}) {
+    if (!address) {
+      throw new Error('Must specify address.');
+    }
+    const wallet = this._getWalletForAccount(address, opts)
+    const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
+    return privKey;
+  }
+
 }
 
 HdKeyring.type = type
