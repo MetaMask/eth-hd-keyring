@@ -1,6 +1,6 @@
 {
   "name": "eth-hd-keyring",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "A simple standard interface for a seed phrase generated set of Ethereum accounts.",
   "main": "index.js",
   "scripts": {
