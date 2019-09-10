@@ -1,6 +1,7 @@
 const EventEmitter = require('events').EventEmitter
 const hdkey = require('ethereumjs-wallet/hdkey')
 const Wallet = require('ethereumjs-wallet')
+const SimpleKeyring = require('eth-simple-keyring')
 const bip39 = require('bip39')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
@@ -9,10 +10,9 @@ const sigUtil = require('eth-sig-util')
 const hdPathString = `m/44'/60'/0'/0`
 const type = 'HD Key Tree'
 
-class HdKeyring extends EventEmitter {
+class HdKeyring extends SimpleKeyring {
 
   /* PUBLIC METHODS */
-
   constructor (opts = {}) {
     super()
     this.type = type
@@ -70,73 +70,10 @@ class HdKeyring extends EventEmitter {
     }))
   }
 
-  // tx is an instance of the ethereumjs-transaction class.
-  signTransaction (address, tx, opts = {}) {
-    const wallet = this._getWalletForAccount(address, opts)
-    var privKey = wallet.getPrivateKey()
-    tx.sign(privKey)
-    return Promise.resolve(tx)
-  }
-
-  // For eth_sign, we need to sign transactions:
-  // hd
-  signMessage (withAccount, data, opts = {}) {
-    const wallet = this._getWalletForAccount(withAccount, opts)
-    const message = ethUtil.stripHexPrefix(data)
-    var privKey = wallet.getPrivateKey()
-    var msgSig = ethUtil.ecsign(new Buffer(message, 'hex'), privKey)
-    var rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
-    return Promise.resolve(rawMsgSig)
-  }
-
-  // For personal_sign, we need to prefix the message:
-  signPersonalMessage (withAccount, msgHex, opts = {}) {
-    const wallet = this._getWalletForAccount(withAccount, opts)
-    const privKey = ethUtil.stripHexPrefix(wallet.getPrivateKey())
-    const privKeyBuffer = new Buffer(privKey, 'hex')
-    const sig = sigUtil.personalSign(privKeyBuffer, { data: msgHex })
-    return Promise.resolve(sig)
-  }
-
-  // personal_signTypedData, signs data along with the schema
-  signTypedData (withAccount, typedData, opts = {}) {
-    const wallet = this._getWalletForAccount(withAccount, opts)
-    const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
-    const signature = sigUtil.signTypedData(privKey, { data: typedData })
-    return Promise.resolve(signature)
-  }
-
-  // For eth_sign, we need to sign transactions:
-  newGethSignMessage (withAccount, msgHex, opts = {}) {
-    const wallet = this._getWalletForAccount(withAccount, opts)
-    const privKey = wallet.getPrivateKey()
-    const msgBuffer = ethUtil.toBuffer(msgHex)
-    const msgHash = ethUtil.hashPersonalMessage(msgBuffer)
-    const msgSig = ethUtil.ecsign(msgHash, privKey)
-    const rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
-    return Promise.resolve(rawMsgSig)
-  }
-
-  // returns an app key
-  getAppKeyAddress (address, origin) {
-    return new Promise((resolve, reject) => {
-      try {
-        const wallet = this._getWalletForAccount(address, {
-          withAppKeyOrigin: origin,
-        })
-        const appKeyAddress = sigUtil.normalize(wallet.getAddress().toString('hex'))
-        return resolve(appKeyAddress)
-      } catch (e) {
-        return reject(e)
-      }
-    })
-  }
-
   exportAccount (address) {
     const wallet = this._getWalletForAccount(address)
     return Promise.resolve(wallet.getPrivateKey().toString('hex'))
   }
-
 
   /* PRIVATE METHODS */
 
@@ -167,6 +104,16 @@ class HdKeyring extends EventEmitter {
 
     return wallet
   }
+
+  getPrivateKeyFor (address, opts = {}) {
+    if (!address) {
+      throw new Error('Must specify address.');
+    }
+    const wallet = this._getWalletForAccount(address, opts)
+    const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
+    return privKey;
+  }
+
 }
 
 HdKeyring.type = type
