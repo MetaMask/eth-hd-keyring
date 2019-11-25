@@ -70,11 +70,6 @@ class HdKeyring extends SimpleKeyring {
     }))
   }
 
-  exportAccount (address) {
-    const wallet = this._getWalletForAccount(address)
-    return Promise.resolve(wallet.getPrivateKey().toString('hex'))
-  }
-
   /* PRIVATE METHODS */
 
   _initFromMnemonic (mnemonic) {
@@ -83,37 +78,6 @@ class HdKeyring extends SimpleKeyring {
     this.hdWallet = hdkey.fromMasterSeed(seed)
     this.root = this.hdWallet.derivePath(this.hdPath)
   }
-
-
-  _getWalletForAccount (account, opts = {}) {
-    const targetAddress = sigUtil.normalize(account)
-
-    let wallet = this.wallets.find((w) => {
-      const address = sigUtil.normalize(w.getAddress().toString('hex'))
-      return ((address === targetAddress) ||
-              (sigUtil.normalize(address) === targetAddress))
-    })
-
-    if (opts.withAppKeyOrigin) {
-      const privKey = wallet.getPrivateKey()
-      const appKeyOriginBuffer = Buffer.from(opts.withAppKeyOrigin, 'utf8')
-      const appKeyBuffer = Buffer.concat([privKey, appKeyOriginBuffer])
-      const appKeyPrivKey = ethUtil.keccak(appKeyBuffer, 256)
-      wallet = Wallet.fromPrivateKey(appKeyPrivKey)
-    }
-
-    return wallet
-  }
-
-  getPrivateKeyFor (address, opts = {}) {
-    if (!address) {
-      throw new Error('Must specify address.');
-    }
-    const wallet = this._getWalletForAccount(address, opts)
-    const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
-    return privKey;
-  }
-
 }
 
 HdKeyring.type = type
