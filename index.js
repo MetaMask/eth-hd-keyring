@@ -85,7 +85,7 @@ class HdKeyring extends SimpleKeyring {
   }
 
 
-  _getWalletForAccount (account, opts = {}) {
+  _getWalletForAccount (account) {
     const targetAddress = sigUtil.normalize(account)
 
     let wallet = this.wallets.find((w) => {
@@ -94,22 +94,14 @@ class HdKeyring extends SimpleKeyring {
               (sigUtil.normalize(address) === targetAddress))
     })
 
-    if (opts.withAppKeyOrigin) {
-      const privKey = wallet.getPrivateKey()
-      const appKeyOriginBuffer = Buffer.from(opts.withAppKeyOrigin, 'utf8')
-      const appKeyBuffer = Buffer.concat([privKey, appKeyOriginBuffer])
-      const appKeyPrivKey = ethUtil.keccak(appKeyBuffer, 256)
-      wallet = Wallet.fromPrivateKey(appKeyPrivKey)
-    }
-
     return wallet
   }
 
-  getPrivateKeyFor (address, opts = {}) {
+  getPrivateKeyFor (address) {
     if (!address) {
       throw new Error('Must specify address.');
     }
-    const wallet = this._getWalletForAccount(address, opts)
+    const wallet = this._getWalletForAccount(address)
     const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
     return privKey;
   }
