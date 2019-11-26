@@ -385,63 +385,87 @@ describe('hd-keyring', function() {
     })
   })
 
-  describe('signing methods withAppKeyOrigin option', function () {
-    it('should signPersonalMessage with the expected key when passed a withAppKeyOrigin', function (done) {
-      const address = firstAcct
-      const message = '0x68656c6c6f20776f726c64'
-
-      const privateKeyBuffer = Buffer.from('8e82d2d74c50e5c8460f771d38a560ebe1151a9134c65a7e92b28ad0cfae7151', 'hex')
-      const expectedSig = sigUtil.personalSign(privateKeyBuffer, { data: message })
-
-      keyring.deserialize({
+  describe('getAppKey', function () {
+    it('should return a private key custom to the provided app origin', async function () {
+      keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 1,
       })
-      .then(() => {
-        return keyring.signPersonalMessage(address, message, {
-          withAppKeyOrigin: 'someapp.origin.io',
-        })
-      })
-      .then((sig) => {
-        assert.equal(sig, expectedSig, 'signed with app key')
-        done()
-      })
-      .catch((reason) => {
-        assert(!reason, reason.message)
-        done()
-      })
+      const address = firstAcct
+      const hexKey = await keyring.exportAccount(address)
+
+      const appKey = await keyring.getAppKey(address, 'someapp.origin.io')
+
+      assert.notEqual(hexKey, appKey.toString('hex'))
+      assert(ethUtil.isValidPrivate(appKey))
     })
 
-    it('should signTypedData with the expected key when passed a withAppKeyOrigin', function (done) {
-      const address = firstAcct
-      const typedData = {
-        types: {
-          EIP712Domain: []
-        },
-        domain: {},
-        primaryType: 'EIP712Domain',
-        message: {}
-      }
-
-      const privateKeyBuffer = Buffer.from('8e82d2d74c50e5c8460f771d38a560ebe1151a9134c65a7e92b28ad0cfae7151', 'hex')
-      const expectedSig = sigUtil.signTypedData(privateKeyBuffer, { data: typedData })
-
-      keyring.deserialize({
+    it('should return different keyrings when provided different app origins', async function () {
+      keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
-        numberOfAccounts: 1
-      }).then(() => {
-        return keyring.signTypedData_v3(address, typedData, {
-          withAppKeyOrigin: 'someapp.origin.io',
-        })
+        numberOfAccounts: 1,
       })
-      .then((sig) => {
-        assert.equal(sig, expectedSig, 'signed with app key')
-        done()
+      const address = firstAcct
+
+      const appKey1 = await keyring.getAppKey(address, 'someapp.origin.io')
+
+      assert(ethUtil.isValidPrivate(appKey1))
+
+      const appKey2 = await keyring.getAppKey(address, 'anotherapp.origin.io')
+
+      assert(ethUtil.isValidPrivate(appKey2))
+
+      assert.notEqual(appKey1.toString('hex'), appKey2.toString('hex'))
+    })
+
+    it('should return the same keyring when called multiple times with the same params', async function () {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
       })
-      .catch((reason) => {
-        assert(!reason, reason.message)
-        done()
+      const address = firstAcct
+
+      const appKey1 = await keyring.getAppKey(address, 'someapp.origin.io')
+
+      assert(ethUtil.isValidPrivate(appKey1))
+
+      const appKey2 = await keyring.getAppKey(address, 'someapp.origin.io')
+
+      assert(ethUtil.isValidPrivate(appKey2))
+
+      assert.equal(appKey1.toString('hex'), appKey2.toString('hex'))
+    })
+
+    it('should throw error if the provided origin is not a string', async function () {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
       })
+      const address = firstAcct
+
+      try {
+        await keyring.getAppKey(address, [])
+      } catch (error) {
+        assert(error instanceof Error, 'Value thrown is not an error')
+        return
+      }
+      assert.fail('Should have thrown error')
+    })
+
+    it('should throw error if the provided origin is an empty string', async function () {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      })
+      const address = firstAcct
+
+      try {
+        await keyring.getAppKey(address, '')
+      } catch (error) {
+        assert(error instanceof Error, 'Value thrown is not an error')
+        return
+      }
+      assert.fail('Should have thrown error')
     })
   })
 })
