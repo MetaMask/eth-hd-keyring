@@ -1,5 +1,4 @@
 const assert = require('assert')
-const extend = require('xtend')
 const HdKeyring = require('../')
 const sigUtil = require('eth-sig-util')
 const ethUtil = require('ethereumjs-util')
