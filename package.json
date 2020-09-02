@@ -28,6 +28,6 @@
     "ethereumjs-wallet": "^0.6.0"
   },
   "devDependencies": {
-    "mocha": "^3.2.0"
+    "mocha": "^8.1.3"
   }
 }
