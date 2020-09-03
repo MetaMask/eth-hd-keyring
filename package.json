@@ -4,6 +4,8 @@
   "description": "A simple standard interface for a seed phrase generated set of Ethereum accounts.",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint --fix . --ext .js",
     "test": "mocha"
   },
   "repository": {
@@ -28,6 +30,11 @@
     "ethereumjs-wallet": "^0.6.0"
   },
   "devDependencies": {
+    "@metamask/eslint-config": "^3.0.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-mocha": "^6.2.2",
     "mocha": "^8.1.3"
   }
 }
