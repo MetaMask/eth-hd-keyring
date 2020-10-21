@@ -7,15 +7,9 @@ module.exports = {
     '@metamask/eslint-config/config/nodejs',
   ],
 
-  parser: 'babel-eslint',
-
   parserOptions: {
     ecmaVersion: 2017,
   },
-
-  plugins: [
-    'import',
-  ],
 
   overrides: [{
     files: [
