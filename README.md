@@ -65,3 +65,8 @@ The `eth_sign` method will receive the incoming data, alread hashed, and must si
 
 Exports the specified account as a private key hex string.
 
+## Running Tests
+
+```bash
+yarn test
+```
