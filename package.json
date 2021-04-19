@@ -28,7 +28,7 @@
   "dependencies": {
     "bip39": "^2.2.0",
     "eth-sig-util": "^3.0.1",
-    "eth-simple-keyring": "^3.5.0",
+    "eth-simple-keyring": "^4.2.0",
     "ethereumjs-util": "^7.0.9",
     "ethereumjs-wallet": "^1.0.1"
   },
