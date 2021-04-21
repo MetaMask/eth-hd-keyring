@@ -1,4 +1,4 @@
-const hdkey = require('ethereumjs-wallet/hdkey')
+const { hdkey } = require('ethereumjs-wallet')
 const SimpleKeyring = require('eth-simple-keyring')
 const bip39 = require('bip39')
 const sigUtil = require('eth-sig-util')
