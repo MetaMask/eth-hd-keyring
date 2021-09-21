@@ -2,6 +2,14 @@
 
 A simple JS class wrapped around [ethereumjs-wallet](https://github.com/ethereumjs/ethereumjs-wallet) designed to expose an interface common to many different signing strategies, to be used in a `KeyringController`, like is being used in [MetaMask](https://metamask.io/)
 
+## Installation
+
+`yarn add @metamask/eth-hd-keyring`
+
+or
+
+`npm install @metamask/eth-hd-keyring`
+
 ## The Keyring Class Protocol
 
 One of the goals of this class is to allow developers to easily add new signing strategies to MetaMask. We call these signing strategies Keyrings, because they can manage multiple keys.
