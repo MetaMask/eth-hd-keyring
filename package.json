@@ -7,6 +7,7 @@
   },
   "main": "index.js",
   "scripts": {
+    "setup": "yarn install && yarn allow-scripts",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint --fix . --ext .js",
     "test": "mocha"
@@ -33,6 +34,7 @@
     "ethereumjs-wallet": "^1.0.1"
   },
   "devDependencies": {
+    "@lavamoat/allow-scripts": "^1.0.6",
     "@metamask/auto-changelog": "^2.5.0",
     "@metamask/eslint-config": "^4.0.0",
     "eslint": "^7.7.0",
@@ -44,5 +46,12 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
+  },
+  "lavamoat": {
+    "allowScripts": {
+      "@lavamoat/preinstall-always-fail": false,
+      "keccak": false,
+      "secp256k1": false
+    }
   }
 }
