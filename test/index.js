@@ -1,5 +1,12 @@
 const assert = require('assert');
-const sigUtil = require('eth-sig-util');
+const {
+  normalize,
+  personalSign,
+  recoverPersonalSignature,
+  recoverTypedSignature,
+  signTypedData,
+  SignTypedDataVersion,
+} = require('@metamask/eth-sig-util');
 const ethUtil = require('ethereumjs-util');
 const HdKeyring = require('..');
 
@@ -140,19 +147,15 @@ describe('hd-keyring', function () {
         .then(() => {
           return keyring.signPersonalMessage(address, message);
         })
-        .then((sig) => {
-          assert.notEqual(sig, message, 'something changed');
+        .then((signature) => {
+          assert.notEqual(signature, message, 'something changed');
 
-          const restored = sigUtil.recoverPersonalSignature({
+          const restored = recoverPersonalSignature({
             data: message,
-            sig,
+            signature,
           });
 
-          assert.equal(
-            restored,
-            sigUtil.normalize(address),
-            'recovered address',
-          );
+          assert.equal(restored, normalize(address), 'recovered address');
           done();
         })
         .catch((reason) => {
@@ -172,14 +175,15 @@ describe('hd-keyring', function () {
           value: 'Hi, Alice!',
         },
       ];
-      const msgParams = { data: typedData };
       await keyring.addAccounts(1);
       const addresses = await keyring.getAccounts();
       const address = addresses[0];
-      const sig = await keyring.signTypedData(address, typedData);
-      const signedParams = Object.create(msgParams);
-      signedParams.sig = sig;
-      const restored = sigUtil.recoverTypedSignatureLegacy(signedParams);
+      const signature = await keyring.signTypedData(address, typedData);
+      const restored = recoverTypedSignature({
+        data: typedData,
+        signature,
+        version: SignTypedDataVersion.V1,
+      });
       assert.equal(restored, address, 'recovered address');
     });
   });
@@ -192,16 +196,17 @@ describe('hd-keyring', function () {
         value: 'Hi, Alice!',
       },
     ];
-    const msgParams = { data: typedData };
 
     it('signs in a compliant and recoverable way', async function () {
       await keyring.addAccounts(1);
       const addresses = await keyring.getAccounts();
       const address = addresses[0];
-      const sig = await keyring.signTypedData_v1(address, typedData);
-      const signedParams = Object.create(msgParams);
-      signedParams.sig = sig;
-      const restored = sigUtil.recoverTypedSignatureLegacy(signedParams);
+      const signature = await keyring.signTypedData_v1(address, typedData);
+      const restored = recoverTypedSignature({
+        data: typedData,
+        signature,
+        version: SignTypedDataVersion.V1,
+      });
       assert.equal(restored, address, 'recovered address');
     });
   });
@@ -223,8 +228,12 @@ describe('hd-keyring', function () {
       });
       const addresses = await keyring.getAccounts();
       const address = addresses[0];
-      const sig = await keyring.signTypedData_v3(address, typedData);
-      const restored = sigUtil.recoverTypedSignature({ data: typedData, sig });
+      const signature = await keyring.signTypedData_v3(address, typedData);
+      const restored = recoverTypedSignature({
+        data: typedData,
+        signature,
+        version: SignTypedDataVersion.V3,
+      });
       assert.equal(restored, address, 'recovered address');
     });
   });
@@ -232,52 +241,52 @@ describe('hd-keyring', function () {
   describe('#signTypedData_v3 signature verification', function () {
     it('signs in a recoverable way.', async function () {
       const typedData = {
-        data: {
-          types: {
-            EIP712Domain: [
-              { name: 'name', type: 'string' },
-              { name: 'version', type: 'string' },
-              { name: 'chainId', type: 'uint256' },
-              { name: 'verifyingContract', type: 'address' },
-            ],
-            Person: [
-              { name: 'name', type: 'string' },
-              { name: 'wallet', type: 'address' },
-            ],
-            Mail: [
-              { name: 'from', type: 'Person' },
-              { name: 'to', type: 'Person' },
-              { name: 'contents', type: 'string' },
-            ],
+        types: {
+          EIP712Domain: [
+            { name: 'name', type: 'string' },
+            { name: 'version', type: 'string' },
+            { name: 'chainId', type: 'uint256' },
+            { name: 'verifyingContract', type: 'address' },
+          ],
+          Person: [
+            { name: 'name', type: 'string' },
+            { name: 'wallet', type: 'address' },
+          ],
+          Mail: [
+            { name: 'from', type: 'Person' },
+            { name: 'to', type: 'Person' },
+            { name: 'contents', type: 'string' },
+          ],
+        },
+        primaryType: 'Mail',
+        domain: {
+          name: 'Ether Mail',
+          version: '1',
+          chainId: 1,
+          verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+        },
+        message: {
+          from: {
+            name: 'Cow',
+            wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
           },
-          primaryType: 'Mail',
-          domain: {
-            name: 'Ether Mail',
-            version: '1',
-            chainId: 1,
-            verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+          to: {
+            name: 'Bob',
+            wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
           },
-          message: {
-            from: {
-              name: 'Cow',
-              wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
-            },
-            to: {
-              name: 'Bob',
-              wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
-            },
-            contents: 'Hello, Bob!',
-          },
+          contents: 'Hello, Bob!',
         },
       };
 
       await keyring.addAccounts(1);
       const addresses = await keyring.getAccounts();
       const address = addresses[0];
-      const sig = await keyring.signTypedData_v3(address, typedData.data);
-      const signedData = Object.create(typedData);
-      signedData.sig = sig;
-      const restored = sigUtil.recoverTypedSignature(signedData);
+      const signature = await keyring.signTypedData_v3(address, typedData);
+      const restored = recoverTypedSignature({
+        data: typedData,
+        signature,
+        version: SignTypedDataVersion.V3,
+      });
       assert.equal(restored, address, 'recovered address');
     });
   });
@@ -442,13 +451,11 @@ describe('hd-keyring', function () {
       const address = firstAcct;
       const message = '0x68656c6c6f20776f726c64';
 
-      const privateKeyBuffer = Buffer.from(
+      const privateKey = Buffer.from(
         '8e82d2d74c50e5c8460f771d38a560ebe1151a9134c65a7e92b28ad0cfae7151',
         'hex',
       );
-      const expectedSig = sigUtil.personalSign(privateKeyBuffer, {
-        data: message,
-      });
+      const expectedSig = personalSign({ privateKey, data: message });
 
       keyring
         .deserialize({
@@ -481,12 +488,14 @@ describe('hd-keyring', function () {
         message: {},
       };
 
-      const privateKeyBuffer = Buffer.from(
+      const privateKey = Buffer.from(
         '8e82d2d74c50e5c8460f771d38a560ebe1151a9134c65a7e92b28ad0cfae7151',
         'hex',
       );
-      const expectedSig = sigUtil.signTypedData(privateKeyBuffer, {
+      const expectedSig = signTypedData({
+        privateKey,
         data: typedData,
+        version: SignTypedDataVersion.V3,
       });
 
       keyring
