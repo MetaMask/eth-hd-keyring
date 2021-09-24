@@ -1,7 +1,7 @@
 const { hdkey } = require('ethereumjs-wallet');
 const SimpleKeyring = require('eth-simple-keyring');
 const bip39 = require('bip39');
-const sigUtil = require('eth-sig-util');
+const { normalize } = require('@metamask/eth-sig-util');
 
 // Options:
 const hdPathString = `m/44'/60'/0'/0`;
@@ -55,7 +55,7 @@ class HdKeyring extends SimpleKeyring {
       this.wallets.push(wallet);
     }
     const hexWallets = newWallets.map((w) => {
-      return sigUtil.normalize(w.getAddress().toString('hex'));
+      return normalize(w.getAddress().toString('hex'));
     });
     return Promise.resolve(hexWallets);
   }
@@ -63,7 +63,7 @@ class HdKeyring extends SimpleKeyring {
   getAccounts() {
     return Promise.resolve(
       this.wallets.map((w) => {
-        return sigUtil.normalize(w.getAddress().toString('hex'));
+        return normalize(w.getAddress().toString('hex'));
       }),
     );
   }
