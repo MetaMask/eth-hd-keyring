@@ -72,7 +72,8 @@ class HdKeyring extends SimpleKeyring {
 
   _initFromMnemonic(mnemonic) {
     this.mnemonic = mnemonic;
-    const seed = bip39.mnemonicToSeed(mnemonic);
+    // eslint-disable-next-line node/no-sync
+    const seed = bip39.mnemonicToSeedSync(mnemonic);
     this.hdWallet = hdkey.fromMasterSeed(seed);
     this.root = this.hdWallet.derivePath(this.hdPath);
   }
