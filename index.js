@@ -28,6 +28,12 @@ class HdKeyring extends SimpleKeyring {
   }
 
   deserialize(opts = {}) {
+    if (this.root) {
+      throw new Error(
+        'Eth-Hd-Keyring: Secret recovery phrase already provided',
+      );
+    }
+
     this.opts = opts || {};
     this.wallets = [];
     this.mnemonic = null;

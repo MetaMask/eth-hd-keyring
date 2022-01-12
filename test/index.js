@@ -40,6 +40,53 @@ describe('hd-keyring', function () {
     });
   });
 
+  describe('re-initialization protection', function () {
+    it('double generateRandomMnemonic', function (done) {
+      keyring.generateRandomMnemonic();
+      let error;
+      try {
+        keyring.generateRandomMnemonic();
+      } catch (err) {
+        error = err;
+      }
+      assert.ok(error);
+      done();
+    });
+
+    it('constructor + generateRandomMnemonic', function (done) {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 2,
+      });
+      let error;
+      try {
+        keyring.generateRandomMnemonic();
+      } catch (err) {
+        error = err;
+      }
+      assert.ok(error);
+      done();
+    });
+
+    it('constructor + deserialize', function (done) {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 2,
+      });
+      let error;
+      try {
+        keyring.deserialize({
+          mnemonic: sampleMnemonic,
+          numberOfAccounts: 1,
+        });
+      } catch (err) {
+        error = err;
+      }
+      assert.ok(error);
+      done();
+    });
+  });
+
   describe('Keyring.type', function () {
     it('is a class property that returns the type string.', function () {
       const { type } = HdKeyring;
