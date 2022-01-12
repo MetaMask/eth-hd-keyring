@@ -38,6 +38,20 @@ describe('hd-keyring', function () {
         done();
       });
     });
+
+    it('throws on invalid mnemonic', function (done) {
+      let error;
+      try {
+        keyring = new HdKeyring({
+          mnemonic: 'abc xyz',
+          numberOfAccounts: 2,
+        });
+      } catch (err) {
+        error = err;
+      }
+      assert.ok(error);
+      done();
+    });
   });
 
   describe('re-initialization protection', function () {

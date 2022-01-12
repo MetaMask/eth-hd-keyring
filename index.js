@@ -86,6 +86,13 @@ class HdKeyring extends SimpleKeyring {
         'Eth-Hd-Keyring: Secret recovery phrase already provided',
       );
     }
+    // validate before initializing
+    const isValid = bip39.validateMnemonic(mnemonic);
+    if (!isValid) {
+      throw new Error(
+        'Eth-Hd-Keyring: Invalid secret recovery phrase provided',
+      );
+    }
     this.mnemonic = mnemonic;
     // eslint-disable-next-line node/no-sync
     const seed = bip39.mnemonicToSeedSync(mnemonic);
