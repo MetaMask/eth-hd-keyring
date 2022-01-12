@@ -95,6 +95,7 @@ describe('hd-keyring', function () {
   describe('#addAccounts', function () {
     describe('with no arguments', function () {
       it('creates a single wallet', function (done) {
+        keyring.generateRandomMnemonic();
         keyring.addAccounts().then(() => {
           assert.equal(keyring.wallets.length, 1);
           done();
@@ -104,6 +105,7 @@ describe('hd-keyring', function () {
 
     describe('with a numeric argument', function () {
       it('creates that number of wallets', function (done) {
+        keyring.generateRandomMnemonic();
         keyring.addAccounts(3).then(() => {
           assert.equal(keyring.wallets.length, 3);
           done();
@@ -175,6 +177,7 @@ describe('hd-keyring', function () {
           value: 'Hi, Alice!',
         },
       ];
+      keyring.generateRandomMnemonic();
       await keyring.addAccounts(1);
       const addresses = await keyring.getAccounts();
       const address = addresses[0];
@@ -198,6 +201,7 @@ describe('hd-keyring', function () {
     ];
 
     it('signs in a compliant and recoverable way', async function () {
+      keyring.generateRandomMnemonic();
       await keyring.addAccounts(1);
       const addresses = await keyring.getAccounts();
       const address = addresses[0];
@@ -278,6 +282,7 @@ describe('hd-keyring', function () {
         },
       };
 
+      keyring.generateRandomMnemonic();
       await keyring.addAccounts(1);
       const addresses = await keyring.getAccounts();
       const address = addresses[0];

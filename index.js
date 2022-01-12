@@ -15,6 +15,10 @@ class HdKeyring extends SimpleKeyring {
     this.deserialize(opts);
   }
 
+  generateRandomMnemonic() {
+    this._initFromMnemonic(bip39.generateMnemonic());
+  }
+
   serialize() {
     return Promise.resolve({
       mnemonic: this.mnemonic,
@@ -43,7 +47,7 @@ class HdKeyring extends SimpleKeyring {
 
   addAccounts(numberOfAccounts = 1) {
     if (!this.root) {
-      this._initFromMnemonic(bip39.generateMnemonic());
+      throw new Error('Eth-Hd-Keyring: No secret recovery phrase provided');
     }
 
     const oldLen = this.wallets.length;
@@ -71,6 +75,11 @@ class HdKeyring extends SimpleKeyring {
   /* PRIVATE METHODS */
 
   _initFromMnemonic(mnemonic) {
+    if (this.root) {
+      throw new Error(
+        'Eth-Hd-Keyring: Secret recovery phrase already provided',
+      );
+    }
     this.mnemonic = mnemonic;
     // eslint-disable-next-line node/no-sync
     const seed = bip39.mnemonicToSeedSync(mnemonic);
