@@ -38,6 +38,67 @@ describe('hd-keyring', function () {
         done();
       });
     });
+
+    it('throws on invalid mnemonic', function (done) {
+      let error;
+      try {
+        keyring = new HdKeyring({
+          mnemonic: 'abc xyz',
+          numberOfAccounts: 2,
+        });
+      } catch (err) {
+        error = err;
+      }
+      assert.ok(error);
+      done();
+    });
+  });
+
+  describe('re-initialization protection', function () {
+    it('double generateRandomMnemonic', function (done) {
+      keyring.generateRandomMnemonic();
+      let error;
+      try {
+        keyring.generateRandomMnemonic();
+      } catch (err) {
+        error = err;
+      }
+      assert.ok(error);
+      done();
+    });
+
+    it('constructor + generateRandomMnemonic', function (done) {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 2,
+      });
+      let error;
+      try {
+        keyring.generateRandomMnemonic();
+      } catch (err) {
+        error = err;
+      }
+      assert.ok(error);
+      done();
+    });
+
+    it('constructor + deserialize', function (done) {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 2,
+      });
+      let error;
+      try {
+        keyring.deserialize({
+          mnemonic: sampleMnemonic,
+          numberOfAccounts: 1,
+        });
+      } catch (err) {
+        error = err;
+      }
+      assert.ok(error);
+      done();
+    });
   });
 
   describe('Keyring.type', function () {
@@ -95,6 +156,7 @@ describe('hd-keyring', function () {
   describe('#addAccounts', function () {
     describe('with no arguments', function () {
       it('creates a single wallet', function (done) {
+        keyring.generateRandomMnemonic();
         keyring.addAccounts().then(() => {
           assert.equal(keyring.wallets.length, 1);
           done();
@@ -104,6 +166,7 @@ describe('hd-keyring', function () {
 
     describe('with a numeric argument', function () {
       it('creates that number of wallets', function (done) {
+        keyring.generateRandomMnemonic();
         keyring.addAccounts(3).then(() => {
           assert.equal(keyring.wallets.length, 3);
           done();
@@ -175,6 +238,7 @@ describe('hd-keyring', function () {
           value: 'Hi, Alice!',
         },
       ];
+      keyring.generateRandomMnemonic();
       await keyring.addAccounts(1);
       const addresses = await keyring.getAccounts();
       const address = addresses[0];
@@ -198,6 +262,7 @@ describe('hd-keyring', function () {
     ];
 
     it('signs in a compliant and recoverable way', async function () {
+      keyring.generateRandomMnemonic();
       await keyring.addAccounts(1);
       const addresses = await keyring.getAccounts();
       const address = addresses[0];
@@ -278,6 +343,7 @@ describe('hd-keyring', function () {
         },
       };
 
+      keyring.generateRandomMnemonic();
       await keyring.addAccounts(1);
       const addresses = await keyring.getAccounts();
       const address = addresses[0];
