@@ -116,11 +116,13 @@ describe('hd-keyring', function () {
     });
   });
 
-  describe('#serialize empty wallets.', function () {
-    it('serializes a new mnemonic', function () {
+  describe('#serialize mnemonic.', function () {
+    it('serializes mnemonic into a bufferArray', function () {
+      keyring.generateRandomMnemonic()
       keyring.serialize().then((output) => {
         assert.equal(output.numberOfAccounts, 0);
-        assert.equal(output.mnemonic, null);
+        assert.equal(typeof output.mnemonic, 'array');
+        assert.equal(output.mnemonic.length, 85);
       });
     });
   });
