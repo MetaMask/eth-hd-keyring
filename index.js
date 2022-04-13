@@ -90,8 +90,8 @@ class HdKeyring extends SimpleKeyring {
    * BIP39-compliant mnemonic.
    *
    * @param {string|Array<number>|Buffer} mnemonic - A seed phrase represented
-   * as a string, an array of UTF-8 bytes, or a Buffer. All mnemonic input params
-   * regardless of type should be NFKD normalized.
+   * as a string, an array of UTF-8 bytes, or a Buffer. Mnemonic input
+   * passed as type buffer or array of UTF-8 bytes must be NFKD normalized.
    */
   _initFromMnemonic(mnemonic) {
     if (this.root) {
