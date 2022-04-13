@@ -1,6 +1,6 @@
 const { hdkey } = require('ethereumjs-wallet');
 const SimpleKeyring = require('eth-simple-keyring');
-const bip39 = require('bip39');
+const bip39 = require('@metamask/bip39');
 const { normalize } = require('@metamask/eth-sig-util');
 
 // Options:
@@ -90,7 +90,8 @@ class HdKeyring extends SimpleKeyring {
    * BIP39-compliant mnemonic.
    *
    * @param {string|Array<number>|Buffer} mnemonic - A seed phrase represented
-   * as a string, an array of UTF-8 bytes, or a Buffer.
+   * as a string, an array of UTF-8 bytes, or a Buffer. All mnemonic input params
+   * regardless of type should be NFKD normalized.
    */
   _initFromMnemonic(mnemonic) {
     if (this.root) {
