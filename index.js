@@ -1,6 +1,6 @@
 const { hdkey } = require('ethereumjs-wallet');
 const SimpleKeyring = require('eth-simple-keyring');
-const bip39 = require('bip39');
+const bip39 = require('@metamask/bip39');
 const { normalize } = require('@metamask/eth-sig-util');
 
 // Options:
@@ -20,8 +20,13 @@ class HdKeyring extends SimpleKeyring {
   }
 
   serialize() {
+    const mnemonicAsBuffer =
+      typeof this.mnemonic === 'string'
+        ? Buffer.from(this.mnemonic, 'utf8')
+        : this.mnemonic;
+
     return Promise.resolve({
-      mnemonic: this.mnemonic,
+      mnemonic: Array.from(mnemonicAsBuffer.values()),
       numberOfAccounts: this.wallets.length,
       hdPath: this.hdPath,
     });
@@ -80,6 +85,14 @@ class HdKeyring extends SimpleKeyring {
 
   /* PRIVATE METHODS */
 
+  /**
+   * Sets appropriate properties for the keyring based on the given
+   * BIP39-compliant mnemonic.
+   *
+   * @param {string|Array<number>|Buffer} mnemonic - A seed phrase represented
+   * as a string, an array of UTF-8 bytes, or a Buffer. Mnemonic input
+   * passed as type buffer or array of UTF-8 bytes must be NFKD normalized.
+   */
   _initFromMnemonic(mnemonic) {
     if (this.root) {
       throw new Error(
@@ -93,7 +106,15 @@ class HdKeyring extends SimpleKeyring {
         'Eth-Hd-Keyring: Invalid secret recovery phrase provided',
       );
     }
-    this.mnemonic = mnemonic;
+
+    if (typeof mnemonic === 'string') {
+      this.mnemonic = Buffer.from(mnemonic, 'utf8');
+    } else if (Array.isArray(mnemonic)) {
+      this.mnemonic = Buffer.from(mnemonic);
+    } else {
+      this.mnemonic = mnemonic;
+    }
+
     // eslint-disable-next-line node/no-sync
     const seed = bip39.mnemonicToSeedSync(mnemonic);
     this.hdWallet = hdkey.fromMasterSeed(seed);

@@ -80,6 +80,16 @@
     semver "^7.3.5"
     yargs "^17.0.1"
 
+"@metamask/bip39@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@metamask/bip39/-/bip39-4.0.0.tgz#1cb867a8454e3d45d065107b4e070d58bdb64aac"
+  integrity sha512-xH2g8mFe9p2WePnKeQJH4U8MB6pWPyvwpsz4stb0YdnMOR7cKA6Jm/KOSFiPKr1i9+AzNDImt/XxhwF5ej4jXQ==
+  dependencies:
+    "@types/node" "11.11.6"
+    create-hash "^1.1.0"
+    pbkdf2 "^3.0.9"
+    randombytes "^2.0.1"
+
 "@metamask/eslint-config-mocha@^8.0.0":
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/@metamask/eslint-config-mocha/-/eslint-config-mocha-8.0.0.tgz#522287c45bec87cb6ab051fa47cdfa7f3000c7cf"
@@ -440,16 +450,6 @@ bindings@^1.2.1:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/bindings/-/bindings-1.3.0.tgz#b346f6ecf6a95f5a815c5839fc7cdb22502f1ed7"
   integrity sha512-DpLh5EzMR2kzvX1KIlVC0VkC3iZtHKTgdtZ0a3pglBZdaQFjt5S9g9xd1lE+YvXyfd6mtCeRnrUfOLYiTMlNSw==
-
-bip39@^3.0.4:
-  version "3.0.4"
-  resolved "https://registry.nlark.com/bip39/download/bip39-3.0.4.tgz#5b11fed966840b5e1b8539f0f54ab6392969b2a0"
-  integrity sha1-WxH+2WaEC14bhTnw9Uq2OSlpsqA=
-  dependencies:
-    "@types/node" "11.11.6"
-    create-hash "^1.1.0"
-    pbkdf2 "^3.0.9"
-    randombytes "^2.0.1"
 
 bip66@^1.1.3:
   version "1.1.5"
