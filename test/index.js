@@ -1,4 +1,3 @@
-const assert = require('assert');
 const {
   normalize,
   personalSign,
@@ -19,167 +18,134 @@ const sampleMnemonic =
 const firstAcct = '0x1c96099350f13d558464ec79b9be4445aa0ef579';
 const secondAcct = '0x1b00aed43a693f3a957f9feb5cc08afa031e37a0';
 
-describe('hd-keyring', function () {
+describe('hd-keyring', () => {
   let keyring;
-  beforeEach(function () {
+  beforeEach(() => {
     keyring = new HdKeyring();
   });
 
-  describe('constructor', function () {
-    it('constructs', function (done) {
+  describe('constructor', () => {
+    it('constructs', async () => {
       keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 2,
       });
 
-      keyring.getAccounts().then((accounts) => {
-        assert.equal(accounts[0], firstAcct);
-        assert.equal(accounts[1], secondAcct);
-        done();
-      });
+      const accounts = await keyring.getAccounts();
+      expect(accounts[0]).toStrictEqual(firstAcct);
+      expect(accounts[1]).toStrictEqual(secondAcct);
     });
 
-    it('throws on invalid mnemonic', function (done) {
-      let error;
-      try {
-        keyring = new HdKeyring({
-          mnemonic: 'abc xyz',
-          numberOfAccounts: 2,
-        });
-      } catch (err) {
-        error = err;
-      }
-      assert.ok(error);
-      done();
+    it('throws on invalid mnemonic', () => {
+      expect(
+        () =>
+          new HdKeyring({
+            mnemonic: 'abc xyz',
+            numberOfAccounts: 2,
+          }),
+      ).toThrow('Eth-Hd-Keyring: Invalid secret recovery phrase provided');
     });
   });
 
-  describe('re-initialization protection', function () {
-    it('double generateRandomMnemonic', function (done) {
+  describe('re-initialization protection', () => {
+    const alreadyProvidedError =
+      'Eth-Hd-Keyring: Secret recovery phrase already provided';
+    it('double generateRandomMnemonic', () => {
       keyring.generateRandomMnemonic();
-      let error;
-      try {
+      expect(() => {
         keyring.generateRandomMnemonic();
-      } catch (err) {
-        error = err;
-      }
-      assert.ok(error);
-      done();
+      }).toThrow(alreadyProvidedError);
     });
 
-    it('constructor + generateRandomMnemonic', function (done) {
+    it('constructor + generateRandomMnemonic', () => {
       keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 2,
       });
-      let error;
-      try {
+
+      expect(() => {
         keyring.generateRandomMnemonic();
-      } catch (err) {
-        error = err;
-      }
-      assert.ok(error);
-      done();
+      }).toThrow(alreadyProvidedError);
     });
 
-    it('constructor + deserialize', function (done) {
+    it('constructor + deserialize', () => {
       keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 2,
       });
-      let error;
-      try {
+
+      expect(() => {
         keyring.deserialize({
           mnemonic: sampleMnemonic,
           numberOfAccounts: 1,
         });
-      } catch (err) {
-        error = err;
-      }
-      assert.ok(error);
-      done();
+      }).toThrow(alreadyProvidedError);
     });
   });
 
-  describe('Keyring.type', function () {
-    it('is a class property that returns the type string.', function () {
+  describe('Keyring.type', () => {
+    it('is a class property that returns the type string.', () => {
       const { type } = HdKeyring;
-      assert.equal(typeof type, 'string');
+      expect(typeof type).toBe('string');
     });
   });
 
-  describe('#type', function () {
-    it('returns the correct value', function () {
+  describe('#type', () => {
+    it('returns the correct value', () => {
       const { type } = keyring;
       const correct = HdKeyring.type;
-      assert.equal(type, correct);
+      expect(type).toStrictEqual(correct);
     });
   });
 
-  describe('#serialize mnemonic.', function () {
-    it('serializes mnemonic class variable into a buffer array and does not add accounts', function () {
+  describe('#serialize mnemonic.', () => {
+    it('serializes mnemonic class variable into a buffer array and does not add accounts', async () => {
       keyring.generateRandomMnemonic();
-      keyring.serialize().then((output) => {
-        assert.equal(output.numberOfAccounts, 0);
-        assert.equal(Array.isArray(output.mnemonic), true);
+      const output = await keyring.serialize();
+      expect(output.numberOfAccounts).toBe(0);
+      expect(Array.isArray(output.mnemonic)).toBe(true);
+    });
+  });
+
+  describe('#deserialize a private key', () => {
+    it('serializes what it deserializes', async () => {
+      await keyring.deserialize({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
       });
+      expect(keyring.wallets).toHaveLength(1);
+      await keyring.addAccounts(1);
+      const accounts = await keyring.getAccounts();
+      expect(accounts[0]).toStrictEqual(firstAcct);
+      expect(accounts[1]).toStrictEqual(secondAcct);
+      expect(accounts).toHaveLength(2);
+      const serialized = await keyring.serialize();
+      expect(Buffer.from(serialized.mnemonic).toString()).toStrictEqual(
+        sampleMnemonic,
+      );
     });
   });
 
-  describe('#deserialize a private key', function () {
-    it('serializes what it deserializes', function (done) {
-      keyring
-        .deserialize({
-          mnemonic: sampleMnemonic,
-          numberOfAccounts: 1,
-        })
-        .then(() => {
-          assert.equal(keyring.wallets.length, 1, 'restores two accounts');
-          return keyring.addAccounts(1);
-        })
-        .then(() => {
-          return keyring.getAccounts();
-        })
-        .then((accounts) => {
-          assert.equal(accounts[0], firstAcct);
-          assert.equal(accounts[1], secondAcct);
-          assert.equal(accounts.length, 2);
-          return keyring.serialize();
-        })
-        .then((serialized) => {
-          assert.equal(
-            Buffer.from(serialized.mnemonic).toString(),
-            sampleMnemonic,
-          );
-          done();
-        });
-    });
-  });
-
-  describe('#addAccounts', function () {
-    describe('with no arguments', function () {
-      it('creates a single wallet', function (done) {
+  describe('#addAccounts', () => {
+    describe('with no arguments', () => {
+      it('creates a single wallet', async () => {
         keyring.generateRandomMnemonic();
-        keyring.addAccounts().then(() => {
-          assert.equal(keyring.wallets.length, 1);
-          done();
-        });
+        await keyring.addAccounts();
+        expect(keyring.wallets).toHaveLength(1);
       });
     });
 
-    describe('with a numeric argument', function () {
-      it('creates that number of wallets', function (done) {
+    describe('with a numeric argument', () => {
+      it('creates that number of wallets', async () => {
         keyring.generateRandomMnemonic();
-        keyring.addAccounts(3).then(() => {
-          assert.equal(keyring.wallets.length, 3);
-          done();
-        });
+        await keyring.addAccounts(3);
+        expect(keyring.wallets).toHaveLength(3);
       });
     });
   });
 
-  describe('#getAccounts', function () {
-    it('calls getAddress on each wallet', function (done) {
+  describe('#getAccounts', () => {
+    it('calls getAddress on each wallet', async () => {
       // Push a mock wallet
       const desiredOutput = 'foo';
       keyring.wallets.push({
@@ -192,46 +158,35 @@ describe('hd-keyring', function () {
         },
       });
 
-      keyring.getAccounts().then((output) => {
-        assert.equal(output[0], `0x${desiredOutput}`);
-        assert.equal(output.length, 1);
-        done();
-      });
+      const output = await keyring.getAccounts();
+      expect(output[0]).toBe(`0x${desiredOutput}`);
+      expect(output).toHaveLength(1);
     });
   });
 
-  describe('#signPersonalMessage', function () {
-    it('returns the expected value', function (done) {
+  describe('#signPersonalMessage', () => {
+    it('returns the expected value', async () => {
       const address = firstAcct;
       const message = '0x68656c6c6f20776f726c64';
 
-      keyring
-        .deserialize({
-          mnemonic: sampleMnemonic,
-          numberOfAccounts: 1,
-        })
-        .then(() => {
-          return keyring.signPersonalMessage(address, message);
-        })
-        .then((signature) => {
-          assert.notEqual(signature, message, 'something changed');
+      await keyring.deserialize({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      });
+      const signature = await keyring.signPersonalMessage(address, message);
+      expect(signature).not.toBe(message);
 
-          const restored = recoverPersonalSignature({
-            data: message,
-            signature,
-          });
+      const restored = recoverPersonalSignature({
+        data: message,
+        signature,
+      });
 
-          assert.equal(restored, normalize(address), 'recovered address');
-          done();
-        })
-        .catch((reason) => {
-          console.error('failed because', reason);
-        });
+      expect(restored).toStrictEqual(normalize(address));
     });
   });
 
-  describe('#signTypedData', function () {
-    it('can recover a basic signature', async function () {
+  describe('#signTypedData', () => {
+    it('can recover a basic signature', async () => {
       Buffer.from(privKeyHex, 'hex');
 
       const typedData = [
@@ -251,11 +206,11 @@ describe('hd-keyring', function () {
         signature,
         version: SignTypedDataVersion.V1,
       });
-      assert.equal(restored, address, 'recovered address');
+      expect(restored).toStrictEqual(address);
     });
   });
 
-  describe('#signTypedData_v1', function () {
+  describe('#signTypedData_v1', () => {
     const typedData = [
       {
         type: 'string',
@@ -264,7 +219,7 @@ describe('hd-keyring', function () {
       },
     ];
 
-    it('signs in a compliant and recoverable way', async function () {
+    it('signs in a compliant and recoverable way', async () => {
       keyring.generateRandomMnemonic();
       await keyring.addAccounts(1);
       const addresses = await keyring.getAccounts();
@@ -275,12 +230,12 @@ describe('hd-keyring', function () {
         signature,
         version: SignTypedDataVersion.V1,
       });
-      assert.equal(restored, address, 'recovered address');
+      expect(restored).toStrictEqual(address);
     });
   });
 
-  describe('#signTypedData_v3', function () {
-    it('signs in a compliant and recoverable way', async function () {
+  describe('#signTypedData_v3', () => {
+    it('signs in a compliant and recoverable way', async () => {
       const typedData = {
         types: {
           EIP712Domain: [],
@@ -302,12 +257,12 @@ describe('hd-keyring', function () {
         signature,
         version: SignTypedDataVersion.V3,
       });
-      assert.equal(restored, address, 'recovered address');
+      expect(restored).toStrictEqual(address);
     });
   });
 
-  describe('#signTypedData_v3 signature verification', function () {
-    it('signs in a recoverable way.', async function () {
+  describe('#signTypedData_v3 signature verification', () => {
+    it('signs in a recoverable way.', async () => {
       const typedData = {
         types: {
           EIP712Domain: [
@@ -356,62 +311,40 @@ describe('hd-keyring', function () {
         signature,
         version: SignTypedDataVersion.V3,
       });
-      assert.equal(restored, address, 'recovered address');
+      expect(restored).toStrictEqual(address);
     });
   });
 
-  describe('custom hd paths', function () {
-    it('can deserialize with an hdPath param and generate the same accounts.', function (done) {
+  describe('custom hd paths', () => {
+    it('can deserialize with an hdPath param and generate the same accounts.', async () => {
       const hdPathString = `m/44'/60'/0'/0`;
-
-      keyring
-        .deserialize({
-          mnemonic: sampleMnemonic,
-          numberOfAccounts: 1,
-          hdPath: hdPathString,
-        })
-        .then(() => {
-          return keyring.getAccounts();
-        })
-        .then((addresses) => {
-          assert.equal(addresses[0], firstAcct);
-          return keyring.serialize();
-        })
-        .then((serialized) => {
-          assert.equal(serialized.hdPath, hdPathString);
-          done();
-        })
-        .catch((reason) => {
-          console.error('failed because', reason);
-        });
+      keyring.deserialize({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+        hdPath: hdPathString,
+      });
+      const addresses = await keyring.getAccounts();
+      expect(addresses[0]).toStrictEqual(firstAcct);
+      const serialized = await keyring.serialize();
+      expect(serialized.hdPath).toStrictEqual(hdPathString);
     });
 
-    it('can deserialize with an hdPath param and generate different accounts.', function (done) {
+    it('can deserialize with an hdPath param and generate different accounts.', async () => {
       const hdPathString = `m/44'/60'/0'/1`;
 
-      keyring
-        .deserialize({
-          mnemonic: sampleMnemonic,
-          numberOfAccounts: 1,
-          hdPath: hdPathString,
-        })
-        .then(() => {
-          return keyring.getAccounts();
-        })
-        .then((addresses) => {
-          assert.notEqual(addresses[0], firstAcct);
-          return keyring.serialize();
-        })
-        .then((serialized) => {
-          assert.equal(serialized.hdPath, hdPathString);
-          done();
-        })
-        .catch((reason) => {
-          console.log('failed because', reason);
-        });
+      keyring.deserialize({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+        hdPath: hdPathString,
+      });
+      const addresses = await keyring.getAccounts();
+      expect(addresses[0]).not.toBe(firstAcct);
+      const serialized = await keyring.serialize();
+      expect(serialized.hdPath).toStrictEqual(hdPathString);
     });
   });
 
+  // eslint-disable-next-line
   /*
   describe('create and restore 1k accounts', function () {
     it('should restore same accounts with no problem', async function () {
@@ -444,8 +377,8 @@ describe('hd-keyring', function () {
   })
   */
 
-  describe('getAppKeyAddress', function () {
-    it('should return a public address custom to the provided app key origin', async function () {
+  describe('getAppKeyAddress', () => {
+    it('should return a public address custom to the provided app key origin', async () => {
       const address = firstAcct;
 
       keyring = new HdKeyring({
@@ -457,14 +390,14 @@ describe('hd-keyring', function () {
         'someapp.origin.io',
       );
 
-      assert.notEqual(address, appKeyAddress);
-      assert(ethUtil.isValidAddress(appKeyAddress));
+      expect(address).not.toBe(appKeyAddress);
+      expect(ethUtil.isValidAddress(appKeyAddress)).toBe(true);
 
       const accounts = await keyring.getAccounts();
-      assert.equal(accounts[0], firstAcct);
+      expect(accounts[0]).toStrictEqual(firstAcct);
     });
 
-    it('should return different addresses when provided different app key origins', async function () {
+    it('should return different addresses when provided different app key origins', async () => {
       keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 1,
@@ -477,19 +410,19 @@ describe('hd-keyring', function () {
         'someapp.origin.io',
       );
 
-      assert(ethUtil.isValidAddress(appKeyAddress1));
+      expect(ethUtil.isValidAddress(appKeyAddress1)).toBe(true);
 
       const appKeyAddress2 = await keyring.getAppKeyAddress(
         address,
         'anotherapp.origin.io',
       );
 
-      assert(ethUtil.isValidAddress(appKeyAddress2));
+      expect(ethUtil.isValidAddress(appKeyAddress2)).toBe(true);
 
-      assert.notEqual(appKeyAddress1, appKeyAddress2);
+      expect(appKeyAddress1).not.toBe(appKeyAddress2);
     });
 
-    it('should return the same address when called multiple times with the same params', async function () {
+    it('should return the same address when called multiple times with the same params', async () => {
       keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 1,
@@ -502,21 +435,21 @@ describe('hd-keyring', function () {
         'someapp.origin.io',
       );
 
-      assert(ethUtil.isValidAddress(appKeyAddress1));
+      expect(ethUtil.isValidAddress(appKeyAddress1)).toBe(true);
 
       const appKeyAddress2 = await keyring.getAppKeyAddress(
         address,
         'someapp.origin.io',
       );
 
-      assert(ethUtil.isValidAddress(appKeyAddress2));
+      expect(ethUtil.isValidAddress(appKeyAddress2)).toBe(true);
 
-      assert.equal(appKeyAddress1, appKeyAddress2);
+      expect(appKeyAddress1).toStrictEqual(appKeyAddress2);
     });
   });
 
-  describe('signing methods withAppKeyOrigin option', function () {
-    it('should signPersonalMessage with the expected key when passed a withAppKeyOrigin', function (done) {
+  describe('signing methods withAppKeyOrigin option', () => {
+    it('should signPersonalMessage with the expected key when passed a withAppKeyOrigin', async () => {
       const address = firstAcct;
       const message = '0x68656c6c6f20776f726c64';
 
@@ -526,27 +459,18 @@ describe('hd-keyring', function () {
       );
       const expectedSig = personalSign({ privateKey, data: message });
 
-      keyring
-        .deserialize({
-          mnemonic: sampleMnemonic,
-          numberOfAccounts: 1,
-        })
-        .then(() => {
-          return keyring.signPersonalMessage(address, message, {
-            withAppKeyOrigin: 'someapp.origin.io',
-          });
-        })
-        .then((sig) => {
-          assert.equal(sig, expectedSig, 'signed with app key');
-          done();
-        })
-        .catch((reason) => {
-          assert(!reason, reason.message);
-          done();
-        });
+      await keyring.deserialize({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      });
+      const sig = await keyring.signPersonalMessage(address, message, {
+        withAppKeyOrigin: 'someapp.origin.io',
+      });
+
+      expect(sig).toStrictEqual(expectedSig);
     });
 
-    it('should signTypedData with the expected key when passed a withAppKeyOrigin', function (done) {
+    it('should signTypedData with the expected key when passed a withAppKeyOrigin', async () => {
       const address = firstAcct;
       const typedData = {
         types: {
@@ -567,24 +491,15 @@ describe('hd-keyring', function () {
         version: SignTypedDataVersion.V3,
       });
 
-      keyring
-        .deserialize({
-          mnemonic: sampleMnemonic,
-          numberOfAccounts: 1,
-        })
-        .then(() => {
-          return keyring.signTypedData_v3(address, typedData, {
-            withAppKeyOrigin: 'someapp.origin.io',
-          });
-        })
-        .then((sig) => {
-          assert.equal(sig, expectedSig, 'signed with app key');
-          done();
-        })
-        .catch((reason) => {
-          assert(!reason, reason.message);
-          done();
-        });
+      await keyring.deserialize({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      });
+
+      const sig = await keyring.signTypedData_v3(address, typedData, {
+        withAppKeyOrigin: 'someapp.origin.io',
+      });
+      expect(sig).toStrictEqual(expectedSig);
     });
   });
 });
