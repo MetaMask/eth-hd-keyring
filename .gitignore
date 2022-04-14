@@ -3,3 +3,6 @@ package-lock.json
 
 # Optional eslint cache
 .eslintcache
+
+# Jest
+/coverage
