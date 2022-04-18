@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.1]
+### Uncategorized
+- fix _initFromMnemonic bug + get test coverage to 100% ([#62](https://github.com/MetaMask/eth-hd-keyring/pull/62))
+
 ## [4.0.0]
 ### Changed
 - **BREAKING**: Do not allow re-initialization of keyring instance ([#55](https://github.com/MetaMask/eth-hd-keyring/pull/55))
@@ -16,5 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Obfuscate serialized mnemonic ([#59](https://github.com/MetaMask/eth-hd-keyring/pull/59))
 - Package name changed from `eth-hd-keyring` to `@metamask/eth-hd-keyring`
 
-[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.0...HEAD
+[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.1...HEAD
+[4.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/MetaMask/eth-hd-keyring/releases/tag/v4.0.0
