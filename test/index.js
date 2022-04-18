@@ -25,9 +25,31 @@ describe('hd-keyring', () => {
   });
 
   describe('constructor', () => {
-    it('constructs', async () => {
+    it('constructs with a typeof string mnemonic', async () => {
       keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
+        numberOfAccounts: 2,
+      });
+
+      const accounts = await keyring.getAccounts();
+      expect(accounts[0]).toStrictEqual(firstAcct);
+      expect(accounts[1]).toStrictEqual(secondAcct);
+    });
+
+    it('constructs with a typeof array mnemonic', async () => {
+      keyring = new HdKeyring({
+        mnemonic: Array.from(Buffer.from(sampleMnemonic, 'utf8').values()),
+        numberOfAccounts: 2,
+      });
+
+      const accounts = await keyring.getAccounts();
+      expect(accounts[0]).toStrictEqual(firstAcct);
+      expect(accounts[1]).toStrictEqual(secondAcct);
+    });
+
+    it('constructs with a typeof buffer mnemonic', async () => {
+      keyring = new HdKeyring({
+        mnemonic: Buffer.from(sampleMnemonic, 'utf8'),
         numberOfAccounts: 2,
       });
 
@@ -99,8 +121,15 @@ describe('hd-keyring', () => {
   });
 
   describe('#serialize mnemonic.', () => {
-    it('serializes mnemonic class variable into a buffer array and does not add accounts', async () => {
+    it('serializes mnemonic stored as a buffer in a class variable into a buffer array and does not add accounts', async () => {
       keyring.generateRandomMnemonic();
+      const output = await keyring.serialize();
+      expect(output.numberOfAccounts).toBe(0);
+      expect(Array.isArray(output.mnemonic)).toBe(true);
+    });
+
+    it('serializes mnemonic stored as a string in a class variable into a buffer array and does not add accounts', async () => {
+      keyring.mnemonic = sampleMnemonic;
       const output = await keyring.serialize();
       expect(output.numberOfAccounts).toBe(0);
       expect(Array.isArray(output.mnemonic)).toBe(true);
@@ -132,6 +161,12 @@ describe('hd-keyring', () => {
         keyring.generateRandomMnemonic();
         await keyring.addAccounts();
         expect(keyring.wallets).toHaveLength(1);
+      });
+
+      it('throws an error when no SRP has been generated yet', async () => {
+        expect(() => keyring.addAccounts()).toThrow(
+          'Eth-Hd-Keyring: No secret recovery phrase provided',
+        );
       });
     });
 

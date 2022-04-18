@@ -38,8 +38,7 @@ class HdKeyring extends SimpleKeyring {
         'Eth-Hd-Keyring: Secret recovery phrase already provided',
       );
     }
-
-    this.opts = opts || {};
+    this.opts = opts;
     this.wallets = [];
     this.mnemonic = null;
     this.root = null;
@@ -116,7 +115,7 @@ class HdKeyring extends SimpleKeyring {
     }
 
     // eslint-disable-next-line node/no-sync
-    const seed = bip39.mnemonicToSeedSync(mnemonic);
+    const seed = bip39.mnemonicToSeedSync(this.mnemonic);
     this.hdWallet = hdkey.fromMasterSeed(seed);
     this.root = this.hdWallet.derivePath(this.hdPath);
   }
