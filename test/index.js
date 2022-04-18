@@ -15,13 +15,6 @@ const privKeyHex =
 
 const sampleMnemonic =
   'finish oppose decorate face calm tragic certain desk hour urge dinosaur mango';
-const sampleBufferArrayMnemonic = [
-  102, 105, 110, 105, 115, 104, 32, 111, 112, 112, 111, 115, 101, 32, 100, 101,
-  99, 111, 114, 97, 116, 101, 32, 102, 97, 99, 101, 32, 99, 97, 108, 109, 32,
-  116, 114, 97, 103, 105, 99, 32, 99, 101, 114, 116, 97, 105, 110, 32, 100, 101,
-  115, 107, 32, 104, 111, 117, 114, 32, 117, 114, 103, 101, 32, 100, 105, 110,
-  111, 115, 97, 117, 114, 32, 109, 97, 110, 103, 111,
-];
 const firstAcct = '0x1c96099350f13d558464ec79b9be4445aa0ef579';
 const secondAcct = '0x1b00aed43a693f3a957f9feb5cc08afa031e37a0';
 
@@ -45,7 +38,18 @@ describe('hd-keyring', () => {
 
     it('constructs with a typeof array mnemonic', async () => {
       keyring = new HdKeyring({
-        mnemonic: sampleBufferArrayMnemonic,
+        mnemonic: Array.from(Buffer.from(sampleMnemonic, 'utf8').values()),
+        numberOfAccounts: 2,
+      });
+
+      const accounts = await keyring.getAccounts();
+      expect(accounts[0]).toStrictEqual(firstAcct);
+      expect(accounts[1]).toStrictEqual(secondAcct);
+    });
+
+    it('constructs with a typeof buffer mnemonic', async () => {
+      keyring = new HdKeyring({
+        mnemonic: Buffer.from(sampleMnemonic, 'utf8'),
         numberOfAccounts: 2,
       });
 
