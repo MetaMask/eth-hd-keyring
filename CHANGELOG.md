@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add tests to get coverage to 100% ([#62](https://github.com/MetaMask/eth-hd-keyring/pull/62))
 
 ### Fixed
-- Fix bug where we are passing the unbuffered mnemonic to bip39.mnemonicToSeedSync when `_initFromMnemonic` is passed a typeof `string` mnemonic ([#62](https://github.com/MetaMask/eth-hd-keyring/pull/62))
+- Fix bug where an unexpected error would occur if the mnemonic passed to `_initFromMnemonic` was a buffer array ([#62](https://github.com/MetaMask/eth-hd-keyring/pull/62))
 
 ## [4.0.0]
 ### Changed
