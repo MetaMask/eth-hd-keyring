@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [4.0.2]
-### Uncategorized
-- add arg validation for method deserialize ([#65](https://github.com/MetaMask/eth-hd-keyring/pull/65))
+### Added
+- Add arg validation for method deserialize ([#65](https://github.com/MetaMask/eth-hd-keyring/pull/65))
+    - As of 4.0.0 deserialize method can no longer be passed an opts object containing a value for `numberOfAccounts` if it is not also containing a value for `mnemonic`.
 
 ## [4.0.1]
 ### Added
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - We now have an allowlist for all post-install scripts. The standard setup script has been added, along with new contributor documentation in the README to explain this script.
 - Obfuscate serialized mnemonic ([#59](https://github.com/MetaMask/eth-hd-keyring/pull/59))
     - Class variable `mnemonic` on `HdKeyring` can now be either type `Buffer` or type `string`.
+    - Deserialize method (and `HdKeyring` constructor by extension) can no longer be passed an opts object containing a value for `numberOfAccounts` if it is not also containing a value for `mnemonic`.
 - Package name changed from `eth-hd-keyring` to `@metamask/eth-hd-keyring`.
 
 [Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.2...HEAD
