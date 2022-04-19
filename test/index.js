@@ -67,6 +67,17 @@ describe('hd-keyring', () => {
           }),
       ).toThrow('Eth-Hd-Keyring: Invalid secret recovery phrase provided');
     });
+
+    it('throws when numberOfAccounts is passed with no mnemonic', () => {
+      expect(
+        () =>
+          new HdKeyring({
+            numberOfAccounts: 2,
+          }),
+      ).toThrow(
+        'Eth-Hd-Keyring: Deserialize method cannot be called with an opts value for numberOfAccounts and no menmonic',
+      );
+    });
   });
 
   describe('re-initialization protection', () => {

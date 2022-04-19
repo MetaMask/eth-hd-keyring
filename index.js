@@ -33,6 +33,12 @@ class HdKeyring extends SimpleKeyring {
   }
 
   deserialize(opts = {}) {
+    if (opts.numberOfAccounts && !opts.mnemonic) {
+      throw new Error(
+        'Eth-Hd-Keyring: Deserialize method cannot be called with an opts value for numberOfAccounts and no menmonic',
+      );
+    }
+
     if (this.root) {
       throw new Error(
         'Eth-Hd-Keyring: Secret recovery phrase already provided',
