@@ -9,10 +9,10 @@ const type = 'HD Key Tree';
 
 class HdKeyring extends SimpleKeyring {
   /* PUBLIC METHODS */
-  constructor(opts = {}) {
-    super();
+  constructor(opts) {
+    super(opts);
     this.type = type;
-    this.deserialize(opts);
+    // this.deserialize(opts);
   }
 
   generateRandomMnemonic() {
@@ -32,24 +32,26 @@ class HdKeyring extends SimpleKeyring {
     });
   }
 
-  deserialize(opts = {}) {
+  deserialize(opts) {
     if (this.root) {
       throw new Error(
         'Eth-Hd-Keyring: Secret recovery phrase already provided',
       );
     }
-    this.opts = opts;
+    this.opts = opts || {};
     this.wallets = [];
     this.mnemonic = null;
     this.root = null;
-    this.hdPath = opts.hdPath || hdPathString;
+    this.hdPath = this.opts.hdPath || hdPathString;
 
-    if (opts.mnemonic) {
-      this._initFromMnemonic(opts.mnemonic);
+    if (this.opts.mnemonic) {
+      this._initFromMnemonic(this.opts.mnemonic);
+    } else {
+      this.generateRandomMnemonic();
     }
 
-    if (opts.numberOfAccounts) {
-      return this.addAccounts(opts.numberOfAccounts);
+    if (this.opts.numberOfAccounts) {
+      return this.addAccounts(this.opts.numberOfAccounts);
     }
 
     return Promise.resolve([]);
