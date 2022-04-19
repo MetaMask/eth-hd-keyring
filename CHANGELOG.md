@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.1]
+### Added
+- Add tests to get coverage to 100% ([#62](https://github.com/MetaMask/eth-hd-keyring/pull/62))
+
+### Fixed
+- Fix bug where an unexpected error would occur if the mnemonic passed to `_initFromMnemonic` was a buffer array ([#62](https://github.com/MetaMask/eth-hd-keyring/pull/62))
+
 ## [4.0.0]
 ### Changed
 - **BREAKING**: Do not allow re-initialization of keyring instance ([#55](https://github.com/MetaMask/eth-hd-keyring/pull/55))
@@ -14,7 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `@lavamoat/allow-scripts` ([#47](https://github.com/MetaMask/eth-hd-keyring/pull/47))
     - We now have an allowlist for all post-install scripts. The standard setup script has been added, along with new contributor documentation in the README to explain this script.
 - Obfuscate serialized mnemonic ([#59](https://github.com/MetaMask/eth-hd-keyring/pull/59))
-- Package name changed from `eth-hd-keyring` to `@metamask/eth-hd-keyring`
+    - Class variable `mnemonic` on `HdKeyring` can now be either type `Buffer` or type `string`.
+- Package name changed from `eth-hd-keyring` to `@metamask/eth-hd-keyring`.
 
-[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.0...HEAD
+[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.1...HEAD
+[4.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/MetaMask/eth-hd-keyring/releases/tag/v4.0.0
