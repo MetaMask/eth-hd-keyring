@@ -20,9 +20,9 @@ const secondAcct = '0x1b00aed43a693f3a957f9feb5cc08afa031e37a0';
 
 describe('hd-keyring', () => {
   let keyring;
-  beforeEach(() => {
-    keyring = new HdKeyring();
-  });
+  // beforeEach(() => {
+  //   keyring = new HdKeyring();
+  // });
 
   describe('constructor', () => {
     it('constructs with a typeof string mnemonic', async () => {
