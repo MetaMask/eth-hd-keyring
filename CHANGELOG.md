@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.0.2]
 ### Added
 - Add parameter validation for constructor / `deserialize` method ([#65](https://github.com/MetaMask/eth-hd-keyring/pull/65))
-    - As of 4.0.0 deserialize method can no longer be passed an opts object containing a value for `numberOfAccounts` if it is not also containing a value for `mnemonic`.
+    - As of v4.0.0, the `deserialize` method (which is also called by the constructor) can no longer generate accounts with the `numberOfAccounts` option without a `mnemonic`. Prior to v4.0.0, a mnemonic was generated automatically if it was missing, but we now want to ensure a mnemonic is never implicitly generated without the caller knowing.
 
 ## [4.0.1]
 ### Added
