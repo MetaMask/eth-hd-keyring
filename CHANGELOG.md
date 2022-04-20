@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - We now have an allowlist for all post-install scripts. The standard setup script has been added, along with new contributor documentation in the README to explain this script.
 - Obfuscate serialized mnemonic ([#59](https://github.com/MetaMask/eth-hd-keyring/pull/59))
     - Class variable `mnemonic` on `HdKeyring` can now be either type `Buffer` or type `string`.
-    - Deserialize method (and `HdKeyring` constructor by extension) can no longer be passed an opts object containing a value for `numberOfAccounts` if it is not also containing a value for `mnemonic`.
+    - Deserialize method (and `HdKeyring` constructor by extension) can no longer be passed an options object containing a value for `numberOfAccounts` if it is not also containing a value for `mnemonic`.
 - Package name changed from `eth-hd-keyring` to `@metamask/eth-hd-keyring`.
 
 [Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.2...HEAD
