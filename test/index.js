@@ -6,7 +6,9 @@ const {
   signTypedData,
   SignTypedDataVersion,
 } = require('@metamask/eth-sig-util');
-const ethUtil = require('ethereumjs-util');
+const { wordlist } = require('@metamask/scure-bip39/dist/wordlists/english');
+const oldMMForkBIP39 = require('@metamask/bip39');
+const { isValidAddress } = require('@ethereumjs/util');
 const HdKeyring = require('..');
 
 // Sample account:
@@ -36,9 +38,9 @@ describe('hd-keyring', () => {
       expect(accounts[1]).toStrictEqual(secondAcct);
     });
 
-    it('constructs with a typeof array mnemonic', async () => {
+    it('constructs with a typeof buffer mnemonic', async () => {
       keyring = new HdKeyring({
-        mnemonic: Array.from(Buffer.from(sampleMnemonic, 'utf8').values()),
+        mnemonic: Buffer.from(sampleMnemonic, 'utf8'),
         numberOfAccounts: 2,
       });
 
@@ -47,9 +49,15 @@ describe('hd-keyring', () => {
       expect(accounts[1]).toStrictEqual(secondAcct);
     });
 
-    it('constructs with a typeof buffer mnemonic', async () => {
+    it('constructs with a typeof Uint8Array mnemonic', async () => {
+      const indices = sampleMnemonic
+        .split(' ')
+        .map((word) => wordlist.indexOf(word));
+      const uInt8ArrayOfMnemonic = new Uint8Array(
+        new Uint16Array(indices).buffer,
+      );
       keyring = new HdKeyring({
-        mnemonic: Buffer.from(sampleMnemonic, 'utf8'),
+        mnemonic: uInt8ArrayOfMnemonic,
         numberOfAccounts: 2,
       });
 
@@ -132,18 +140,34 @@ describe('hd-keyring', () => {
   });
 
   describe('#serialize mnemonic.', () => {
-    it('serializes mnemonic stored as a buffer in a class variable into a buffer array and does not add accounts', async () => {
-      keyring.generateRandomMnemonic();
+    it('serializes mnemonic stored as a buffer to a Uint8Array', async () => {
+      keyring.mnemonic = oldMMForkBIP39.generateMnemonic();
+      const mnemonicAsUint8Array = keyring.stringToUint8Array(
+        keyring.mnemonic.toString(),
+      );
       const output = await keyring.serialize();
       expect(output.numberOfAccounts).toBe(0);
-      expect(Array.isArray(output.mnemonic)).toBe(true);
+      expect(output.mnemonic).toStrictEqual(mnemonicAsUint8Array);
     });
 
-    it('serializes mnemonic stored as a string in a class variable into a buffer array and does not add accounts', async () => {
+    it('serializes keyring data with mnemonic stored as a Uint8Array', async () => {
+      keyring.generateRandomMnemonic();
+      const { mnemonic } = keyring;
+      const hdpath = keyring.hdPath;
+      keyring.addAccounts(1);
+      const output = await keyring.serialize();
+      expect(output.numberOfAccounts).toBe(1);
+      expect(output.hdPath).toStrictEqual(hdpath);
+      expect(output.mnemonic).toStrictEqual(mnemonic);
+    });
+
+    it('serializes mnemonic stored as a string', async () => {
       keyring.mnemonic = sampleMnemonic;
       const output = await keyring.serialize();
       expect(output.numberOfAccounts).toBe(0);
-      expect(Array.isArray(output.mnemonic)).toBe(true);
+      expect(output.mnemonic).toStrictEqual(
+        keyring.stringToUint8Array(sampleMnemonic),
+      );
     });
   });
 
@@ -160,7 +184,7 @@ describe('hd-keyring', () => {
       expect(accounts[1]).toStrictEqual(secondAcct);
       expect(accounts).toHaveLength(2);
       const serialized = await keyring.serialize();
-      expect(Buffer.from(serialized.mnemonic).toString()).toStrictEqual(
+      expect(keyring.uint8ArrayToString(serialized.mnemonic)).toStrictEqual(
         sampleMnemonic,
       );
     });
@@ -437,7 +461,7 @@ describe('hd-keyring', () => {
       );
 
       expect(address).not.toBe(appKeyAddress);
-      expect(ethUtil.isValidAddress(appKeyAddress)).toBe(true);
+      expect(isValidAddress(appKeyAddress)).toBe(true);
 
       const accounts = await keyring.getAccounts();
       expect(accounts[0]).toStrictEqual(firstAcct);
@@ -456,14 +480,14 @@ describe('hd-keyring', () => {
         'someapp.origin.io',
       );
 
-      expect(ethUtil.isValidAddress(appKeyAddress1)).toBe(true);
+      expect(isValidAddress(appKeyAddress1)).toBe(true);
 
       const appKeyAddress2 = await keyring.getAppKeyAddress(
         address,
         'anotherapp.origin.io',
       );
 
-      expect(ethUtil.isValidAddress(appKeyAddress2)).toBe(true);
+      expect(isValidAddress(appKeyAddress2)).toBe(true);
 
       expect(appKeyAddress1).not.toBe(appKeyAddress2);
     });
@@ -481,14 +505,14 @@ describe('hd-keyring', () => {
         'someapp.origin.io',
       );
 
-      expect(ethUtil.isValidAddress(appKeyAddress1)).toBe(true);
+      expect(isValidAddress(appKeyAddress1)).toBe(true);
 
       const appKeyAddress2 = await keyring.getAppKeyAddress(
         address,
         'someapp.origin.io',
       );
 
-      expect(ethUtil.isValidAddress(appKeyAddress2)).toBe(true);
+      expect(isValidAddress(appKeyAddress2)).toBe(true);
 
       expect(appKeyAddress1).toStrictEqual(appKeyAddress2);
     });
