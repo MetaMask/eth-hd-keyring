@@ -1,6 +1,7 @@
 const { hdkey } = require('ethereumjs-wallet');
 const SimpleKeyring = require('eth-simple-keyring');
 const bip39 = require('@metamask/bip39');
+const bip39QBCK = require('bip39-qbck');
 const { normalize } = require('@metamask/eth-sig-util');
 
 // Options:
@@ -17,6 +18,11 @@ class HdKeyring extends SimpleKeyring {
 
   generateRandomMnemonic() {
     this._initFromMnemonic(bip39.generateMnemonic());
+  }
+
+  async generateRandomMnemonicQBCK() {
+    const response = await bip39QBCK.generateMnemonicQBCK();
+    this._initFromMnemonic(response);
   }
 
   serialize() {
