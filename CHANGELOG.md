@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.1.0]
+### Added
+- Add bip39-qbck random mnemonic generation by adding the async `generateRandomMnemonicQBCK` method.
+
 ## [4.0.2]
 ### Added
 - Add parameter validation for constructor / `deserialize` method ([#65](https://github.com/MetaMask/eth-hd-keyring/pull/65))
