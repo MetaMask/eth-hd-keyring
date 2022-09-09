@@ -1,5 +1,5 @@
 {
-  "name": "eth-hd-keyring-qbck",
+  "name": "eth-hd-keyring",
   "version": "4.1.0",
   "description": "A simple standard interface for a seed phrase generated set of Ethereum accounts.",
   "keywords": [
