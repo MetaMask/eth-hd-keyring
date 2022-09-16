@@ -9,6 +9,7 @@ const {
 const { wordlist } = require('@metamask/scure-bip39/dist/wordlists/english');
 const oldMMForkBIP39 = require('@metamask/bip39');
 const { isValidAddress } = require('@ethereumjs/util');
+const OldHdKeyring = require('@metamask/eth-hd-keyring');
 const HdKeyring = require('..');
 
 // Sample account:
@@ -24,6 +25,28 @@ describe('hd-keyring', () => {
   let keyring;
   beforeEach(() => {
     keyring = new HdKeyring();
+  });
+
+  describe('compare old bip39 implementation with new', () => {
+    it('should derive the same accounts from the same mnemonics', () => {
+      const mnemonics = [];
+      for (let i = 0; i < 99; i++) {
+        mnemonics.push(oldMMForkBIP39.generateMnemonic());
+      }
+
+      mnemonics.forEach(async (mnemonic) => {
+        const newHDKeyring = new HdKeyring({ mnemonic, numberOfAccounts: 3 });
+        const oldHDKeyring = new OldHdKeyring({
+          mnemonic,
+          numberOfAccounts: 3,
+        });
+        const newAccounts = await newHDKeyring.getAccounts();
+        const oldAccounts = await oldHDKeyring.getAccounts();
+        expect(newAccounts[0]).toStrictEqual(oldAccounts[0]);
+        expect(newAccounts[1]).toStrictEqual(oldAccounts[1]);
+        expect(newAccounts[2]).toStrictEqual(oldAccounts[2]);
+      });
+    });
   });
 
   describe('constructor', () => {

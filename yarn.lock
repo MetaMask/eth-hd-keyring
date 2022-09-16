@@ -617,6 +617,17 @@
   resolved "https://registry.yarnpkg.com/@metamask/eslint-config/-/eslint-config-8.0.0.tgz#f4e3bcd6b37ec135b5a72902b0526cba2a6b5a4d"
   integrity sha512-ZO9B3ohNhjomrufNAkxnDXV46Kut7NKzri7itDxUzHJncNtI1of7ewWh6fKPl/hr6Al6Gd7WgjPdJZGFpzKPQw==
 
+"@metamask/eth-hd-keyring@4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@metamask/eth-hd-keyring/-/eth-hd-keyring-4.0.2.tgz#0a81556a556b361755c8d6fb5aced1ce5be0331c"
+  integrity sha512-v47VOTCCmZUZ6uxM5tQNoasQjLdrZADmgph2fhk4m7zKVUxDvYFU7FJT3Rm55fk8mg+dKSbEObDriqbdWeBbcA==
+  dependencies:
+    "@metamask/bip39" "^4.0.0"
+    "@metamask/eth-sig-util" "^4.0.0"
+    eth-simple-keyring "^4.2.0"
+    ethereumjs-util "^7.0.9"
+    ethereumjs-wallet "^1.0.1"
+
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@metamask/eth-sig-util/-/eth-sig-util-4.0.1.tgz#3ad61f6ea9ad73ba5b19db780d40d9aae5157088"
