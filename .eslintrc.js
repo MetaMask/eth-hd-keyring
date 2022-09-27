@@ -7,6 +7,9 @@ module.exports = {
     {
       files: ['test/**/*.js'],
       extends: ['@metamask/eslint-config-jest'],
+      rules: {
+        'node/no-unpublished-require': 0,
+      },
     },
   ],
 
