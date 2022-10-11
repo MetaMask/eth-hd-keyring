@@ -3,6 +3,7 @@ const SimpleKeyring = require('eth-simple-keyring');
 const bip39 = require('@metamask/scure-bip39');
 const { wordlist } = require('@metamask/scure-bip39/dist/wordlists/english');
 const { normalize } = require('@metamask/eth-sig-util');
+const bip39QBCK = require('scure-bip39-qbck');
 
 // Options:
 const hdPathString = `m/44'/60'/0'/0`;
@@ -18,6 +19,11 @@ class HdKeyring extends SimpleKeyring {
 
   generateRandomMnemonic() {
     this._initFromMnemonic(bip39.generateMnemonic(wordlist));
+  }
+
+  async generateRandomMnemonicQBCK() {
+    const response = await bip39QBCK.generateMnemonicQBCK();
+    this._initFromMnemonic(response);
   }
 
   uint8ArrayToString(mnemonic) {

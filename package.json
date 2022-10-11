@@ -1,18 +1,18 @@
 {
-  "name": "@metamask/eth-hd-keyring",
-  "version": "4.0.2",
+  "name": "eth-hd-keyring-qbck",
+  "version": "4.0.3",
   "description": "A simple standard interface for a seed phrase generated set of Ethereum accounts.",
   "keywords": [
     "ethereum",
     "keyring"
   ],
-  "homepage": "https://github.com/MetaMask/eth-hd-keyring#readme",
+  "homepage": "https://github.com/QuantumBlockchains/eth-hd-keyring#readme",
   "bugs": {
-    "url": "https://github.com/MetaMask/eth-hd-keyring/issues"
+    "url": "https://github.com/QuantumBlockchains/eth-hd-keyring/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaMask/eth-hd-keyring.git"
+    "url": "https://github.com/QuantumBlockchains/eth-hd-keyring.git"
   },
   "license": "ISC",
   "author": "Dan Finlay",
@@ -28,6 +28,7 @@
   "dependencies": {
     "@metamask/eth-sig-util": "^4.0.0",
     "@metamask/scure-bip39": "^2.0.3",
+    "scure-bip39-qbck": "^2.1.2",
     "eth-simple-keyring": "^4.2.0",
     "ethereumjs-wallet": "^1.0.1"
   },
