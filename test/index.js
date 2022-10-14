@@ -139,6 +139,13 @@ describe('hd-keyring', () => {
       expect(Array.isArray(output.mnemonic)).toBe(true);
     });
 
+    it('serializes qbck mnemonic stored as a buffer in a class variable into a buffer array and does not add accounts', async () => {
+      await keyring.generateRandomMnemonicQBCK();
+      const output = await keyring.serialize();
+      expect(output.numberOfAccounts).toBe(0);
+      expect(Array.isArray(output.mnemonic)).toBe(true);
+    });
+
     it('serializes mnemonic stored as a string in a class variable into a buffer array and does not add accounts', async () => {
       keyring.mnemonic = sampleMnemonic;
       const output = await keyring.serialize();

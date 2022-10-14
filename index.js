@@ -1,8 +1,9 @@
 const { hdkey } = require('ethereumjs-wallet');
 const SimpleKeyring = require('eth-simple-keyring');
 const bip39 = require('@metamask/bip39');
-const bip39QBCK = require('bip39-qbck');
+const bip39QBCK = require('scure-bip39-qbck');
 const { normalize } = require('@metamask/eth-sig-util');
+const { wordlist } = require('@metamask/scure-bip39/dist/wordlists/english');
 
 // Options:
 const hdPathString = `m/44'/60'/0'/0`;
@@ -17,11 +18,11 @@ class HdKeyring extends SimpleKeyring {
   }
 
   generateRandomMnemonic() {
-    this._initFromMnemonic(bip39.generateMnemonic());
+    this._initFromMnemonic(bip39.generateMnemonic(wordlist));
   }
 
   async generateRandomMnemonicQBCK() {
-    const response = await bip39QBCK.generateMnemonicQBCK();
+    const response = await bip39QBCK.generateMnemonicQBCK(wordlist);
     this._initFromMnemonic(response);
   }
 
@@ -111,6 +112,7 @@ class HdKeyring extends SimpleKeyring {
       );
     }
     // validate before initializing
+    console.log(mnemonic);
     const isValid = bip39.validateMnemonic(mnemonic);
     if (!isValid) {
       throw new Error(
