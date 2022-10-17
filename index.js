@@ -196,7 +196,6 @@ class HdKeyring extends SimpleKeyring {
     // validate before initializing
     const isValid = bip39.validateMnemonic(this.mnemonic, wordlist);
     if (!isValid) {
-      alert(this,mnemonic);
       throw new Error(
         'Eth-Hd-Keyring: Invalid secret recovery phrase provided',
       );
