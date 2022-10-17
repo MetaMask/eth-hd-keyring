@@ -22,59 +22,8 @@ class HdKeyring extends SimpleKeyring {
   }
 
   async generateRandomMnemonicQBCK() {
-    const response = await bip39QBCK.generateMnemonicQBCK();
-    this._initFromMnemonic(response);
-  }
-
-  uint8ArrayToString(mnemonic) {
-    const recoveredIndices = Array.from(
-      new Uint16Array(new Uint8Array(mnemonic).buffer),
-    );
-    return recoveredIndices.map((i) => wordlist[i]).join(' ');
-  }
-
-  stringToUint8Array(mnemonic) {
-    const indices = mnemonic.split(' ').map((word) => wordlist.indexOf(word));
-    return new Uint8Array(new Uint16Array(indices).buffer);
-  }
-
-  mnemonicToUint8Array(mnemonic) {
-    let mnemonicData = mnemonic;
-    // when encrypted/decrypted, buffers get cast into js object with a property type set to buffer
-    if (mnemonic && mnemonic.type && mnemonic.type === 'Buffer') {
-      mnemonicData = mnemonic.data;
-    }
-
-    if (
-      // this block is for backwards compatibility with vaults that were previously stored as buffers, number arrays or plain text strings
-      typeof mnemonicData === 'string' ||
-      Buffer.isBuffer(mnemonicData) ||
-      Array.isArray(mnemonicData)
-    ) {
-      let mnemonicAsString = mnemonicData;
-      if (Array.isArray(mnemonicData)) {
-        mnemonicAsString = Buffer.from(mnemonicData).toString();
-      } else if (Buffer.isBuffer(mnemonicData)) {
-        mnemonicAsString = mnemonicData.toString();
-      }
-      return this.stringToUint8Array(mnemonicAsString);
-    } else if (
-      mnemonicData instanceof Object &&
-      !(mnemonicData instanceof Uint8Array)
-    ) {
-      // when encrypted/decrypted the Uint8Array becomes a js object we need to cast back to a Uint8Array
-      return Uint8Array.from(Object.values(mnemonicData));
-    }
-    return mnemonicData;
-  }
-
-  async generateRandomMnemonicQBCK() {
-<<<<<<< HEAD
     const response = await bip39QBCK.generateMnemonicQBCK(wordlist);
     this._initFromMnemonic(response);
-=======
-    const response = await bip39QBCK.generateMnemonicQBCK();
-    this._initFromMnemonic(response);
   }
 
   uint8ArrayToString(mnemonic) {
@@ -117,7 +66,48 @@ class HdKeyring extends SimpleKeyring {
       return Uint8Array.from(Object.values(mnemonicData));
     }
     return mnemonicData;
->>>>>>> main
+  }
+
+  uint8ArrayToString(mnemonic) {
+    const recoveredIndices = Array.from(
+      new Uint16Array(new Uint8Array(mnemonic).buffer),
+    );
+    return recoveredIndices.map((i) => wordlist[i]).join(' ');
+  }
+
+  stringToUint8Array(mnemonic) {
+    const indices = mnemonic.split(' ').map((word) => wordlist.indexOf(word));
+    return new Uint8Array(new Uint16Array(indices).buffer);
+  }
+
+  mnemonicToUint8Array(mnemonic) {
+    let mnemonicData = mnemonic;
+    // when encrypted/decrypted, buffers get cast into js object with a property type set to buffer
+    if (mnemonic && mnemonic.type && mnemonic.type === 'Buffer') {
+      mnemonicData = mnemonic.data;
+    }
+
+    if (
+      // this block is for backwards compatibility with vaults that were previously stored as buffers, number arrays or plain text strings
+      typeof mnemonicData === 'string' ||
+      Buffer.isBuffer(mnemonicData) ||
+      Array.isArray(mnemonicData)
+    ) {
+      let mnemonicAsString = mnemonicData;
+      if (Array.isArray(mnemonicData)) {
+        mnemonicAsString = Buffer.from(mnemonicData).toString();
+      } else if (Buffer.isBuffer(mnemonicData)) {
+        mnemonicAsString = mnemonicData.toString();
+      }
+      return this.stringToUint8Array(mnemonicAsString);
+    } else if (
+      mnemonicData instanceof Object &&
+      !(mnemonicData instanceof Uint8Array)
+    ) {
+      // when encrypted/decrypted the Uint8Array becomes a js object we need to cast back to a Uint8Array
+      return Uint8Array.from(Object.values(mnemonicData));
+    }
+    return mnemonicData;
   }
 
   serialize() {
@@ -206,6 +196,7 @@ class HdKeyring extends SimpleKeyring {
     // validate before initializing
     const isValid = bip39.validateMnemonic(this.mnemonic, wordlist);
     if (!isValid) {
+      alert(this,mnemonic);
       throw new Error(
         'Eth-Hd-Keyring: Invalid secret recovery phrase provided',
       );

@@ -228,9 +228,31 @@ describe('hd-keyring', () => {
       });
     });
 
+    describe('with no arguments', () => {
+      it('creates a single QBCK wallet', async () => {
+        await keyring.generateRandomMnemonicQBCK();
+        await keyring.addAccounts();
+        expect(keyring.wallets).toHaveLength(1);
+      });
+
+      it('throws an error when no SRP has been generated yet', async () => {
+        expect(() => keyring.addAccounts()).toThrow(
+          'Eth-Hd-Keyring: No secret recovery phrase provided',
+        );
+      });
+    });
+
     describe('with a numeric argument', () => {
       it('creates that number of wallets', async () => {
         keyring.generateRandomMnemonic();
+        await keyring.addAccounts(3);
+        expect(keyring.wallets).toHaveLength(3);
+      });
+    });
+
+    describe('with a numeric argument', () => {
+      it('creates that number of QBCK wallets', async () => {
+        await keyring.generateRandomMnemonicQBCK();
         await keyring.addAccounts(3);
         expect(keyring.wallets).toHaveLength(3);
       });
