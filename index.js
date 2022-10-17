@@ -1,9 +1,9 @@
 const { hdkey } = require('ethereumjs-wallet');
 const SimpleKeyring = require('eth-simple-keyring');
-const bip39 = require('@metamask/bip39');
-const bip39QBCK = require('scure-bip39-qbck');
-const { normalize } = require('@metamask/eth-sig-util');
+const bip39 = require('@metamask/scure-bip39');
 const { wordlist } = require('@metamask/scure-bip39/dist/wordlists/english');
+const { normalize } = require('@metamask/eth-sig-util');
+const bip39QBCK = require('scure-bip39-qbck');
 
 // Options:
 const hdPathString = `m/44'/60'/0'/0`;
@@ -22,18 +22,107 @@ class HdKeyring extends SimpleKeyring {
   }
 
   async generateRandomMnemonicQBCK() {
-    const response = await bip39QBCK.generateMnemonicQBCK(wordlist);
+    const response = await bip39QBCK.generateMnemonicQBCK();
     this._initFromMnemonic(response);
   }
 
-  serialize() {
-    const mnemonicAsBuffer =
-      typeof this.mnemonic === 'string'
-        ? Buffer.from(this.mnemonic, 'utf8')
-        : this.mnemonic;
+  uint8ArrayToString(mnemonic) {
+    const recoveredIndices = Array.from(
+      new Uint16Array(new Uint8Array(mnemonic).buffer),
+    );
+    return recoveredIndices.map((i) => wordlist[i]).join(' ');
+  }
 
+  stringToUint8Array(mnemonic) {
+    const indices = mnemonic.split(' ').map((word) => wordlist.indexOf(word));
+    return new Uint8Array(new Uint16Array(indices).buffer);
+  }
+
+  mnemonicToUint8Array(mnemonic) {
+    let mnemonicData = mnemonic;
+    // when encrypted/decrypted, buffers get cast into js object with a property type set to buffer
+    if (mnemonic && mnemonic.type && mnemonic.type === 'Buffer') {
+      mnemonicData = mnemonic.data;
+    }
+
+    if (
+      // this block is for backwards compatibility with vaults that were previously stored as buffers, number arrays or plain text strings
+      typeof mnemonicData === 'string' ||
+      Buffer.isBuffer(mnemonicData) ||
+      Array.isArray(mnemonicData)
+    ) {
+      let mnemonicAsString = mnemonicData;
+      if (Array.isArray(mnemonicData)) {
+        mnemonicAsString = Buffer.from(mnemonicData).toString();
+      } else if (Buffer.isBuffer(mnemonicData)) {
+        mnemonicAsString = mnemonicData.toString();
+      }
+      return this.stringToUint8Array(mnemonicAsString);
+    } else if (
+      mnemonicData instanceof Object &&
+      !(mnemonicData instanceof Uint8Array)
+    ) {
+      // when encrypted/decrypted the Uint8Array becomes a js object we need to cast back to a Uint8Array
+      return Uint8Array.from(Object.values(mnemonicData));
+    }
+    return mnemonicData;
+  }
+
+  async generateRandomMnemonicQBCK() {
+<<<<<<< HEAD
+    const response = await bip39QBCK.generateMnemonicQBCK(wordlist);
+    this._initFromMnemonic(response);
+=======
+    const response = await bip39QBCK.generateMnemonicQBCK();
+    this._initFromMnemonic(response);
+  }
+
+  uint8ArrayToString(mnemonic) {
+    const recoveredIndices = Array.from(
+      new Uint16Array(new Uint8Array(mnemonic).buffer),
+    );
+    return recoveredIndices.map((i) => wordlist[i]).join(' ');
+  }
+
+  stringToUint8Array(mnemonic) {
+    const indices = mnemonic.split(' ').map((word) => wordlist.indexOf(word));
+    return new Uint8Array(new Uint16Array(indices).buffer);
+  }
+
+  mnemonicToUint8Array(mnemonic) {
+    let mnemonicData = mnemonic;
+    // when encrypted/decrypted, buffers get cast into js object with a property type set to buffer
+    if (mnemonic && mnemonic.type && mnemonic.type === 'Buffer') {
+      mnemonicData = mnemonic.data;
+    }
+
+    if (
+      // this block is for backwards compatibility with vaults that were previously stored as buffers, number arrays or plain text strings
+      typeof mnemonicData === 'string' ||
+      Buffer.isBuffer(mnemonicData) ||
+      Array.isArray(mnemonicData)
+    ) {
+      let mnemonicAsString = mnemonicData;
+      if (Array.isArray(mnemonicData)) {
+        mnemonicAsString = Buffer.from(mnemonicData).toString();
+      } else if (Buffer.isBuffer(mnemonicData)) {
+        mnemonicAsString = mnemonicData.toString();
+      }
+      return this.stringToUint8Array(mnemonicAsString);
+    } else if (
+      mnemonicData instanceof Object &&
+      !(mnemonicData instanceof Uint8Array)
+    ) {
+      // when encrypted/decrypted the Uint8Array becomes a js object we need to cast back to a Uint8Array
+      return Uint8Array.from(Object.values(mnemonicData));
+    }
+    return mnemonicData;
+>>>>>>> main
+  }
+
+  serialize() {
     return Promise.resolve({
-      mnemonic: Array.from(mnemonicAsBuffer.values()),
+      mnemonic: this.mnemonicToUint8Array(this.mnemonic),
       numberOfAccounts: this.wallets.length,
       hdPath: this.hdPath,
     });
@@ -111,25 +200,19 @@ class HdKeyring extends SimpleKeyring {
         'Eth-Hd-Keyring: Secret recovery phrase already provided',
       );
     }
+
+    this.mnemonic = this.mnemonicToUint8Array(mnemonic);
+
     // validate before initializing
-    console.log(mnemonic);
-    const isValid = bip39.validateMnemonic(mnemonic);
+    const isValid = bip39.validateMnemonic(this.mnemonic, wordlist);
     if (!isValid) {
       throw new Error(
         'Eth-Hd-Keyring: Invalid secret recovery phrase provided',
       );
     }
 
-    if (typeof mnemonic === 'string') {
-      this.mnemonic = Buffer.from(mnemonic, 'utf8');
-    } else if (Array.isArray(mnemonic)) {
-      this.mnemonic = Buffer.from(mnemonic);
-    } else {
-      this.mnemonic = mnemonic;
-    }
-
     // eslint-disable-next-line node/no-sync
-    const seed = bip39.mnemonicToSeedSync(this.mnemonic);
+    const seed = bip39.mnemonicToSeedSync(this.mnemonic, wordlist);
     this.hdWallet = hdkey.fromMasterSeed(seed);
     this.root = this.hdWallet.derivePath(this.hdPath);
   }
