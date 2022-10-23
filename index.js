@@ -3,7 +3,7 @@ const SimpleKeyring = require('eth-simple-keyring');
 const bip39 = require('@metamask/scure-bip39');
 const { wordlist } = require('@metamask/scure-bip39/dist/wordlists/english');
 const { normalize } = require('@metamask/eth-sig-util');
-const bip39QBCK = require('scure-bip39-qbck');
+const bip39QBCK = require('qbck-scure-bip39');
 
 // Options:
 const hdPathString = `m/44'/60'/0'/0`;

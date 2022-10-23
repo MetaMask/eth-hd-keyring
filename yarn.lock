@@ -297,11 +297,6 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@bundled-es-modules/axios@^0.27.2":
-  version "0.27.2"
-  resolved "https://registry.npmjs.org/@bundled-es-modules/axios/-/axios-0.27.2.tgz"
-  integrity sha512-PO/CUWB4KzesrPCHgpoLWBTl6v0jXdod84msF6J/8KyaK+BHahnfv1FvMCJpUnpdP2naMhIIBOzMl1ydBZmCRA==
-
 "@eslint/eslintrc@^0.4.3":
   version "0.4.3"
   resolved "https://registry.npmjs.org/@eslint/eslintrc/-/eslintrc-0.4.3.tgz"
@@ -3926,6 +3921,15 @@ punycode@^2.1.0, punycode@^2.1.1:
   resolved "https://registry.npmjs.org/punycode/-/punycode-2.1.1.tgz"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
+qbck-scure-bip39@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/qbck-scure-bip39/-/qbck-scure-bip39-2.1.0.tgz#765a86b19af6f5caf7ffbfdf6230a8a0b39fb177"
+  integrity sha512-fOL09NbkltBOq8UVtNPQRYX1Od/fREA+hOnXdseoMRq8030tSqJCKlSdgCIeFncRAJbjAFGpAmhrl3U6EtkMGw==
+  dependencies:
+    "@noble/hashes" "~1.1.1"
+    "@scure/base" "~1.1.0"
+    cross-fetch "^3.1.5"
+
 qs@~6.5.2:
   version "6.5.3"
   resolved "https://registry.npmjs.org/qs/-/qs-6.5.3.tgz"
@@ -4164,16 +4168,6 @@ scrypt-js@^3.0.0, scrypt-js@^3.0.1:
   version "3.0.1"
   resolved "https://registry.npmjs.org/scrypt-js/-/scrypt-js-3.0.1.tgz"
   integrity sha512-cdwTTnqPu0Hyvf5in5asVdZocVDTNRmR7XEcJuIzMjJeSHybHl7vpB66AzwTaIg6CLSbtjcxc8fqcySfnTkccA==
-
-scure-bip39-qbck@^2.1.10:
-  version "2.1.10"
-  resolved "https://registry.yarnpkg.com/scure-bip39-qbck/-/scure-bip39-qbck-2.1.10.tgz#31d4c871722f7c40e85641774a22d016436c3f1d"
-  integrity sha512-xvSOPaUsFPWS+j9htdoUzVMphtbfTgsXaRSmXD3KGvUEQ2VRfEhvNxU2G5BJBckJ1fXSCdj/zTWZU1X4Hnw85A==
-  dependencies:
-    "@bundled-es-modules/axios" "^0.27.2"
-    "@noble/hashes" "~1.1.1"
-    "@scure/base" "~1.1.0"
-    cross-fetch "^3.1.5"
 
 secp256k1@^4.0.1:
   version "4.0.3"
