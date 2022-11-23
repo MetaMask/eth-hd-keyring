@@ -200,12 +200,14 @@ describe('hd-keyring', () => {
         mnemonic: sampleMnemonic,
         numberOfAccounts: 1,
       });
-      expect(keyring._wallets).toHaveLength(1);
+      const accountsFirstCheck = await keyring.getAccounts();
+
+      expect(accountsFirstCheck).toHaveLength(1);
       await keyring.addAccounts(1);
-      const accounts = await keyring.getAccounts();
-      expect(accounts[0]).toStrictEqual(firstAcct);
-      expect(accounts[1]).toStrictEqual(secondAcct);
-      expect(accounts).toHaveLength(2);
+      const accountsSecondCheck = await keyring.getAccounts();
+      expect(accountsSecondCheck[0]).toStrictEqual(firstAcct);
+      expect(accountsSecondCheck[1]).toStrictEqual(secondAcct);
+      expect(accountsSecondCheck).toHaveLength(2);
       const serialized = await keyring.serialize();
       expect(keyring.uint8ArrayToString(serialized.mnemonic)).toStrictEqual(
         sampleMnemonic,
@@ -218,7 +220,8 @@ describe('hd-keyring', () => {
       it('creates a single wallet', async () => {
         keyring.generateRandomMnemonic();
         await keyring.addAccounts();
-        expect(keyring._wallets).toHaveLength(1);
+        const accounts = await keyring.getAccounts();
+        expect(accounts).toHaveLength(1);
       });
 
       it('throws an error when no SRP has been generated yet', async () => {
@@ -232,7 +235,8 @@ describe('hd-keyring', () => {
       it('creates that number of wallets', async () => {
         keyring.generateRandomMnemonic();
         await keyring.addAccounts(3);
-        expect(keyring._wallets).toHaveLength(3);
+        const accounts = await keyring.getAccounts();
+        expect(accounts).toHaveLength(3);
       });
     });
   });
@@ -241,6 +245,8 @@ describe('hd-keyring', () => {
     it('calls getAddress on each wallet', async () => {
       // Push a mock wallet
       const desiredOutput = 'foo';
+      // _wallets is a private property and shouldn't be access like this
+      // this is only used for mocking purposes
       keyring._wallets.push({
         getAddress() {
           return {
@@ -317,7 +323,9 @@ describe('hd-keyring', () => {
       await keyring.addAccounts(1);
       const addresses = await keyring.getAccounts();
       const address = addresses[0];
-      const signature = await keyring.signTypedData(address, typedData);
+      const signature = await keyring.signTypedData(address, typedData, {
+        version: SignTypedDataVersion.V1,
+      });
       const restored = recoverTypedSignature({
         data: typedData,
         signature,

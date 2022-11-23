@@ -32,7 +32,7 @@
     "ethereumjs-wallet": "^1.0.1"
   },
   "devDependencies": {
-    "@ethereumjs/util": "^8.0.0-beta.3",
+    "@ethereumjs/util": "^8.0.2",
     "@lavamoat/allow-scripts": "^1.0.6",
     "@metamask/auto-changelog": "^2.5.0",
     "@metamask/bip39": "^4.0.0",
