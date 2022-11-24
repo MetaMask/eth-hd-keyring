@@ -8,7 +8,7 @@ const {
 } = require('@metamask/eth-sig-util');
 const { wordlist } = require('@metamask/scure-bip39/dist/wordlists/english');
 const oldMMForkBIP39 = require('@metamask/bip39');
-const { isValidAddress } = require('@ethereumjs/util');
+const { isValidAddress, toChecksumAddress } = require('@ethereumjs/util');
 const OldHdKeyring = require('@metamask/eth-hd-keyring');
 const HdKeyring = require('..');
 
@@ -18,8 +18,8 @@ const privKeyHex =
 
 const sampleMnemonic =
   'finish oppose decorate face calm tragic certain desk hour urge dinosaur mango';
-const firstAcct = '0x1c96099350f13d558464ec79b9be4445aa0ef579';
-const secondAcct = '0x1b00aed43a693f3a957f9feb5cc08afa031e37a0';
+const firstAcct = '0x1c96099350f13D558464eC79B9bE4445AA0eF579';
+const secondAcct = '0x1b00AeD43a693F3a957F9FeB5cC08AFA031E37a0';
 
 describe('hd-keyring', () => {
   let keyring;
@@ -241,28 +241,6 @@ describe('hd-keyring', () => {
     });
   });
 
-  describe('#getAccounts', () => {
-    it('calls getAddress on each wallet', async () => {
-      // Push a mock wallet
-      const desiredOutput = 'foo';
-      // _wallets is a private property and shouldn't be access like this
-      // this is only used for mocking purposes
-      keyring._wallets.push({
-        getAddress() {
-          return {
-            toString() {
-              return desiredOutput;
-            },
-          };
-        },
-      });
-
-      const output = await keyring.getAccounts();
-      expect(output[0]).toBe(`0x${desiredOutput}`);
-      expect(output).toHaveLength(1);
-    });
-  });
-
   describe('#signPersonalMessage', () => {
     it('returns the expected value', async () => {
       const address = firstAcct;
@@ -305,7 +283,7 @@ describe('hd-keyring', () => {
         signature,
         version: SignTypedDataVersion.V1,
       });
-      expect(restored).toStrictEqual(address);
+      expect(toChecksumAddress(restored)).toStrictEqual(address);
     });
   });
 
@@ -331,7 +309,7 @@ describe('hd-keyring', () => {
         signature,
         version: SignTypedDataVersion.V1,
       });
-      expect(restored).toStrictEqual(address);
+      expect(toChecksumAddress(restored)).toStrictEqual(address);
     });
   });
 
@@ -360,7 +338,7 @@ describe('hd-keyring', () => {
         signature,
         version: SignTypedDataVersion.V3,
       });
-      expect(restored).toStrictEqual(address);
+      expect(toChecksumAddress(restored)).toStrictEqual(address);
     });
   });
 
@@ -416,7 +394,7 @@ describe('hd-keyring', () => {
         signature,
         version: SignTypedDataVersion.V3,
       });
-      expect(restored).toStrictEqual(address);
+      expect(toChecksumAddress(restored)).toStrictEqual(address);
     });
   });
 

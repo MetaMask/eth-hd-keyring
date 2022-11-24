@@ -1,18 +1,35 @@
-const { hdkey } = require('ethereumjs-wallet');
-const SimpleKeyring = require('@metamask/eth-simple-keyring');
+const { HDKey } = require('ethereum-cryptography/hdkey');
+const { keccak256 } = require('ethereum-cryptography/keccak');
+const {
+  stripHexPrefix,
+  privateToPublic,
+  bufferToHex,
+  publicToAddress,
+  ecsign,
+  arrToBufArr,
+} = require('@ethereumjs/util');
+const { Address } = require('micro-eth-signer');
 const bip39 = require('@metamask/scure-bip39');
 const { wordlist } = require('@metamask/scure-bip39/dist/wordlists/english');
-const { normalize } = require('@metamask/eth-sig-util');
+const {
+  concatSig,
+  decrypt,
+  getEncryptionPublicKey,
+  normalize,
+  personalSign,
+  signTypedData,
+  SignTypedDataVersion,
+} = require('@metamask/eth-sig-util');
 
 // Options:
 const hdPathString = `m/44'/60'/0'/0`;
 const type = 'HD Key Tree';
 
-class HdKeyring extends SimpleKeyring {
+class HdKeyring {
   /* PUBLIC METHODS */
   constructor(opts = {}) {
-    super();
     this.type = type;
+    this._wallets = [];
     this.deserialize(opts);
   }
 
@@ -65,7 +82,7 @@ class HdKeyring extends SimpleKeyring {
   serialize() {
     return Promise.resolve({
       mnemonic: this.mnemonicToUint8Array(this.mnemonic),
-      numberOfAccounts: this._wallets.length,
+      numberOfAccounts: this.getAccounts().length,
       hdPath: this.hdPath,
     });
   }
@@ -107,23 +124,146 @@ class HdKeyring extends SimpleKeyring {
     const oldLen = this._wallets.length;
     const newWallets = [];
     for (let i = oldLen; i < numberOfAccounts + oldLen; i++) {
-      const child = this.root.deriveChild(i);
-      const wallet = child.getWallet();
+      const wallet = this.root.deriveChild(i);
       newWallets.push(wallet);
       this._wallets.push(wallet);
     }
     const hexWallets = newWallets.map((w) => {
-      return normalize(w.getAddress().toString('hex'));
+      return Address.fromPublicKey(w.publicKey);
     });
     return Promise.resolve(hexWallets);
   }
 
   getAccounts() {
-    return Promise.resolve(
-      this._wallets.map((w) => {
-        return normalize(w.getAddress().toString('hex'));
-      }),
+    return this._wallets.map((w) => Address.fromPublicKey(w.publicKey));
+  }
+
+  /* BASE KEYRING METHODS */
+
+  // returns an address specific to an app
+  async getAppKeyAddress(address, origin) {
+    if (!origin || typeof origin !== 'string') {
+      throw new Error(`'origin' must be a non-empty string`);
+    }
+    const wallet = this._getWalletForAccount(address, {
+      withAppKeyOrigin: origin,
+    });
+    const appKeyAddress = normalize(
+      publicToAddress(wallet.publicKey).toString('hex'),
     );
+    return appKeyAddress;
+  }
+
+  // exportAccount should return a hex-encoded private key:
+  async exportAccount(address, opts = {}) {
+    const wallet = this._getWalletForAccount(address, opts);
+    return wallet.privateKey.toString('hex');
+  }
+
+  // tx is an instance of the ethereumjs-transaction class.
+  async signTransaction(address, tx, opts = {}) {
+    const privKey = this._getPrivateKeyFor(address, opts);
+    const signedTx = tx.sign(privKey);
+    // Newer versions of Ethereumjs-tx are immutable and return a new tx object
+    return signedTx === undefined ? tx : signedTx;
+  }
+
+  // For eth_sign, we need to sign arbitrary data:
+  async signMessage(address, data, opts = {}) {
+    const message = stripHexPrefix(data);
+    const privKey = this._getPrivateKeyFor(address, opts);
+    const msgSig = ecsign(Buffer.from(message, 'hex'), privKey);
+    const rawMsgSig = concatSig(msgSig.v, msgSig.r, msgSig.s);
+    return rawMsgSig;
+  }
+
+  // For personal_sign, we need to prefix the message:
+  async signPersonalMessage(address, msgHex, opts = {}) {
+    const privKey = this._getPrivateKeyFor(address, opts);
+    const privateKey = Buffer.from(privKey, 'hex');
+    const sig = personalSign({ privateKey, data: msgHex });
+    return sig;
+  }
+
+  // For eth_decryptMessage:
+  async decryptMessage(withAccount, encryptedData) {
+    const wallet = this._getWalletForAccount(withAccount);
+    const { privateKey } = wallet;
+    const sig = decrypt({ privateKey, encryptedData });
+    return sig;
+  }
+
+  // personal_signTypedData, signs data along with the schema
+  async signTypedData(
+    withAccount,
+    typedData,
+    opts = { version: SignTypedDataVersion.V1 },
+  ) {
+    // Treat invalid versions as "V1"
+    const version = Object.keys(SignTypedDataVersion).includes(opts.version)
+      ? opts.version
+      : SignTypedDataVersion.V1;
+
+    const privateKey = this._getPrivateKeyFor(withAccount, opts);
+    return signTypedData({ privateKey, data: typedData, version });
+  }
+
+  removeAccount(address) {
+    if (
+      !this._wallets
+        .map(({ publicKey }) =>
+          bufferToHex(publicToAddress(publicKey)).toLowerCase(),
+        )
+        .includes(address.toLowerCase())
+    ) {
+      throw new Error(`Address ${address} not found in this keyring`);
+    }
+
+    this._wallets = this._wallets.filter(
+      ({ publicKey }) =>
+        bufferToHex(publicToAddress(publicKey)).toLowerCase() !==
+        address.toLowerCase(),
+    );
+  }
+
+  // get public key for nacl
+  async getEncryptionPublicKey(withAccount, opts = {}) {
+    const privKey = this._getPrivateKeyFor(withAccount, opts);
+    const publicKey = getEncryptionPublicKey(privKey);
+    return publicKey;
+  }
+
+  /* PRIVATE BASE KEYRING METHODS */
+
+  _getPrivateKeyFor(address, opts = {}) {
+    if (!address) {
+      throw new Error('Must specify address.');
+    }
+    const wallet = this._getWalletForAccount(address, opts);
+    return wallet.privateKey;
+  }
+
+  _getWalletForAccount(account, opts = {}) {
+    const address = normalize(account);
+    let wallet = this._wallets.find(({ publicKey }) => {
+      return (
+        Address.fromPublicKey(publicKey).toLowerCase() === address.toLowerCase()
+      );
+    });
+    if (!wallet) {
+      throw new Error('Simple Keyring - Unable to find matching address.');
+    }
+
+    if (opts.withAppKeyOrigin) {
+      const { privateKey } = wallet;
+      const appKeyOriginBuffer = Buffer.from(opts.withAppKeyOrigin, 'utf8');
+      const appKeyBuffer = Buffer.concat([privateKey, appKeyOriginBuffer]);
+      const appKeyPrivateKey = arrToBufArr(keccak256(appKeyBuffer, 256));
+      const appKeyPublicKey = privateToPublic(appKeyPrivateKey);
+      wallet = { privateKey: appKeyPrivateKey, publicKey: appKeyPublicKey };
+    }
+
+    return wallet;
   }
 
   /* PRIVATE METHODS */
@@ -155,8 +295,8 @@ class HdKeyring extends SimpleKeyring {
 
     // eslint-disable-next-line node/no-sync
     const seed = bip39.mnemonicToSeedSync(this.mnemonic, wordlist);
-    this.hdWallet = hdkey.fromMasterSeed(seed);
-    this.root = this.hdWallet.derivePath(this.hdPath);
+    this.hdWallet = HDKey.fromMasterSeed(seed);
+    this.root = this.hdWallet.derive(this.hdPath);
   }
 }
 
