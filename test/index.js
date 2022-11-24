@@ -31,8 +31,8 @@ const privKeyHex =
 
 const sampleMnemonic =
   'finish oppose decorate face calm tragic certain desk hour urge dinosaur mango';
-const firstAcct = '0x1c96099350f13d558464ec79b9be4445aa0ef579';
-const secondAcct = '0x1b00aed43a693f3a957f9feb5cc08afa031e37a0';
+const firstAcct = '0x1c96099350f13D558464eC79B9bE4445AA0eF579';
+const secondAcct = '0x1b00AeD43a693F3a957F9FeB5cC08AFA031E37a0';
 
 const notKeyringAddress = '0xbD20F6F5F1616947a39E11926E78ec94817B3931';
 
@@ -302,7 +302,7 @@ describe('hd-keyring', () => {
         signature,
         version: SignTypedDataVersion.V1,
       });
-      expect(restored).toStrictEqual(address);
+      expect(toChecksumAddress(restored)).toStrictEqual(address);
     });
   });
 
@@ -328,7 +328,7 @@ describe('hd-keyring', () => {
         signature,
         version: SignTypedDataVersion.V1,
       });
-      expect(restored).toStrictEqual(address);
+      expect(toChecksumAddress(restored)).toStrictEqual(address);
     });
   });
 
@@ -357,7 +357,7 @@ describe('hd-keyring', () => {
         signature,
         version: SignTypedDataVersion.V3,
       });
-      expect(restored).toStrictEqual(address);
+      expect(toChecksumAddress(restored)).toStrictEqual(address);
     });
   });
 
@@ -413,7 +413,7 @@ describe('hd-keyring', () => {
         signature,
         version: SignTypedDataVersion.V3,
       });
-      expect(restored).toStrictEqual(address);
+      expect(toChecksumAddress(restored)).toStrictEqual(address);
     });
   });
 
