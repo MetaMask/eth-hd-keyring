@@ -34,18 +34,28 @@ describe('hd-keyring', () => {
         mnemonics.push(oldMMForkBIP39.generateMnemonic());
       }
 
-      mnemonics.forEach(async (mnemonic) => {
-        const newHDKeyring = new HdKeyring({ mnemonic, numberOfAccounts: 3 });
-        const oldHDKeyring = new OldHdKeyring({
-          mnemonic,
-          numberOfAccounts: 3,
-        });
-        const newAccounts = await newHDKeyring.getAccounts();
-        const oldAccounts = await oldHDKeyring.getAccounts();
-        expect(newAccounts[0]).toStrictEqual(oldAccounts[0]);
-        expect(newAccounts[1]).toStrictEqual(oldAccounts[1]);
-        expect(newAccounts[2]).toStrictEqual(oldAccounts[2]);
-      });
+      Promise.all(
+        mnemonics.map(async (mnemonic) => {
+          const newHDKeyring = new HdKeyring({ mnemonic, numberOfAccounts: 3 });
+          const oldHDKeyring = new OldHdKeyring({
+            mnemonic,
+            numberOfAccounts: 3,
+          });
+          const newAccounts = await newHDKeyring.getAccounts();
+          const oldAccounts = await oldHDKeyring.getAccounts();
+          await expect(newAccounts[0]).toStrictEqual(
+            toChecksumAddress(oldAccounts[0]),
+          );
+
+          await expect(newAccounts[1]).toStrictEqual(
+            toChecksumAddress(oldAccounts[1]),
+          );
+
+          await expect(newAccounts[2]).toStrictEqual(
+            toChecksumAddress(oldAccounts[2]),
+          );
+        }),
+      );
     });
   });
 
