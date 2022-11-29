@@ -29,8 +29,7 @@
     "@metamask/eth-sig-util": "^4.0.0",
     "@metamask/eth-simple-keyring": "^5.0.0",
     "@metamask/scure-bip39": "^2.0.3",
-    "ethereum-cryptography": "^1.1.2",
-    "micro-eth-signer": "0.4.8"
+    "ethereum-cryptography": "^1.1.2"
   },
   "devDependencies": {
     "@lavamoat/allow-scripts": "^1.0.6",
