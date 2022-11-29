@@ -17,6 +17,11 @@ const {
   ecrecover,
   pubToAddress,
 } = require('@ethereumjs/util');
+const {
+  TransactionFactory,
+  Transaction: EthereumTx,
+} = require('@ethereumjs/tx');
+
 const OldHdKeyring = require('@metamask/eth-hd-keyring');
 const { keccak256 } = require('ethereum-cryptography/keccak');
 const HdKeyring = require('..');
@@ -843,12 +848,6 @@ describe('hd-keyring', () => {
   });
 
   describe('#decryptMessage', function () {
-    // const address = '0xbe93f9bacbcffc8ee6663f2647917ed7a20a57bb';
-    // const privateKey = Buffer.from(
-    //   '6969696969696969696969696969696969696969696969696969696969696969',
-    //   'hex',
-    // );
-    // const privKeyHex = bufferToHex(privateKey);
     const message = 'Hello world!';
     let encryptedMessage;
 
@@ -886,6 +885,54 @@ describe('hd-keyring', () => {
       await expect(keyring.decryptMessage(firstAcct, {})).rejects.toThrow(
         'Encryption type/version not supported.',
       );
+    });
+  });
+
+  describe('#signTransaction', function () {
+    beforeEach(() => {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      });
+    });
+
+    const txParams = {
+      from: firstAcct,
+      nonce: '0x00',
+      gasPrice: '0x09184e72a000',
+      gasLimit: '0x2710',
+      to: firstAcct,
+      value: '0x1000',
+    };
+
+    it('returns a signed legacy tx object', async function () {
+      const tx = new EthereumTx(txParams);
+      expect(tx.isSigned()).toBe(false);
+
+      const signed = await keyring.signTransaction(firstAcct, tx);
+      expect(signed.isSigned()).toBe(true);
+    });
+
+    it('returns a signed tx object', async function () {
+      const tx = TransactionFactory.fromTxData(txParams);
+      expect(tx.isSigned()).toBe(false);
+
+      const signed = await keyring.signTransaction(firstAcct, tx);
+      expect(signed.isSigned()).toBe(true);
+    });
+
+    it('returns rejected promise if empty address is passed', async function () {
+      const tx = TransactionFactory.fromTxData(txParams);
+      await expect(keyring.signTransaction('', tx)).rejects.toThrow(
+        'Must specify address.',
+      );
+    });
+
+    it('throw error if wrong address is passed', async function () {
+      const tx = TransactionFactory.fromTxData(txParams);
+      await expect(
+        keyring.signTransaction(notKeyringAddress, tx),
+      ).rejects.toThrow('HD Keyring - Unable to find matching address.');
     });
   });
 });
