@@ -1,5 +1,7 @@
 const { HDKey } = require('ethereum-cryptography/hdkey');
 const { keccak256 } = require('ethereum-cryptography/keccak');
+const { Point } = require('ethereum-cryptography/secp256k1');
+const { bytesToHex } = require('ethereum-cryptography/utils');
 const {
   stripHexPrefix,
   privateToPublic,
@@ -7,8 +9,8 @@ const {
   publicToAddress,
   ecsign,
   arrToBufArr,
+  toChecksumAddress,
 } = require('@ethereumjs/util');
-const { Address } = require('micro-eth-signer');
 const bip39 = require('@metamask/scure-bip39');
 const { wordlist } = require('@metamask/scure-bip39/dist/wordlists/english');
 const {
@@ -129,13 +131,13 @@ class HdKeyring {
       this._wallets.push(wallet);
     }
     const hexWallets = newWallets.map((w) => {
-      return Address.fromPublicKey(w.publicKey);
+      return this._AddressfromPublicKey(w.publicKey);
     });
     return Promise.resolve(hexWallets);
   }
 
   getAccounts() {
-    return this._wallets.map((w) => Address.fromPublicKey(w.publicKey));
+    return this._wallets.map((w) => this._AddressfromPublicKey(w.publicKey));
   }
 
   /* BASE KEYRING METHODS */
@@ -233,8 +235,6 @@ class HdKeyring {
     return publicKey;
   }
 
-  /* PRIVATE BASE KEYRING METHODS */
-
   _getPrivateKeyFor(address, opts = {}) {
     if (!address) {
       throw new Error('Must specify address.');
@@ -247,7 +247,8 @@ class HdKeyring {
     const address = normalize(account);
     let wallet = this._wallets.find(({ publicKey }) => {
       return (
-        Address.fromPublicKey(publicKey).toLowerCase() === address.toLowerCase()
+        this._AddressfromPublicKey(publicKey).toLowerCase() ===
+        address.toLowerCase()
       );
     });
     if (!wallet) {
@@ -420,6 +421,12 @@ class HdKeyring {
     const seed = bip39.mnemonicToSeedSync(this.mnemonic, wordlist);
     this.hdWallet = HDKey.fromMasterSeed(seed);
     this.root = this.hdWallet.derive(this.hdPath);
+  }
+
+  _AddressfromPublicKey(publicKey) {
+    const pub = Point.fromHex(publicKey).toRawBytes(false);
+    const addr = bytesToHex(keccak256(pub.slice(1, 65))).slice(24);
+    return toChecksumAddress(`0x${addr}`);
   }
 }
 
