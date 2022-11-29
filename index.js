@@ -5,7 +5,6 @@ const { bytesToHex } = require('ethereum-cryptography/utils');
 const {
   stripHexPrefix,
   privateToPublic,
-  bufferToHex,
   publicToAddress,
   ecsign,
   arrToBufArr,
@@ -159,7 +158,7 @@ class HdKeyring {
   // exportAccount should return a hex-encoded private key:
   async exportAccount(address, opts = {}) {
     const wallet = this._getWalletForAccount(address, opts);
-    return wallet.privateKey.toString('hex');
+    return bytesToHex(wallet.privKeyBytes);
   }
 
   // tx is an instance of the ethereumjs-transaction class.
@@ -214,7 +213,7 @@ class HdKeyring {
     if (
       !this._wallets
         .map(({ publicKey }) =>
-          bufferToHex(publicToAddress(publicKey)).toLowerCase(),
+          this._AddressfromPublicKey(publicKey).toLowerCase(),
         )
         .includes(address.toLowerCase())
     ) {
@@ -223,7 +222,7 @@ class HdKeyring {
 
     this._wallets = this._wallets.filter(
       ({ publicKey }) =>
-        bufferToHex(publicToAddress(publicKey)).toLowerCase() !==
+        this._AddressfromPublicKey(publicKey).toLowerCase() !==
         address.toLowerCase(),
     );
   }

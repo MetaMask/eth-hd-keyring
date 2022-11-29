@@ -5,6 +5,7 @@ const {
   recoverTypedSignature,
   signTypedData,
   SignTypedDataVersion,
+  encrypt,
 } = require('@metamask/eth-sig-util');
 const { wordlist } = require('@metamask/scure-bip39/dist/wordlists/english');
 const oldMMForkBIP39 = require('@metamask/bip39');
@@ -480,77 +481,6 @@ describe('hd-keyring', () => {
   })
   */
 
-  describe('getAppKeyAddress', () => {
-    it('should return a public address custom to the provided app key origin', async () => {
-      const address = firstAcct;
-
-      keyring = new HdKeyring({
-        mnemonic: sampleMnemonic,
-        numberOfAccounts: 1,
-      });
-      const appKeyAddress = await keyring.getAppKeyAddress(
-        address,
-        'someapp.origin.io',
-      );
-
-      expect(address).not.toBe(appKeyAddress);
-      expect(isValidAddress(appKeyAddress)).toBe(true);
-
-      const accounts = await keyring.getAccounts();
-      expect(accounts[0]).toStrictEqual(firstAcct);
-    });
-
-    it('should return different addresses when provided different app key origins', async () => {
-      keyring = new HdKeyring({
-        mnemonic: sampleMnemonic,
-        numberOfAccounts: 1,
-      });
-
-      const address = firstAcct;
-
-      const appKeyAddress1 = await keyring.getAppKeyAddress(
-        address,
-        'someapp.origin.io',
-      );
-
-      expect(isValidAddress(appKeyAddress1)).toBe(true);
-
-      const appKeyAddress2 = await keyring.getAppKeyAddress(
-        address,
-        'anotherapp.origin.io',
-      );
-
-      expect(isValidAddress(appKeyAddress2)).toBe(true);
-
-      expect(appKeyAddress1).not.toBe(appKeyAddress2);
-    });
-
-    it('should return the same address when called multiple times with the same params', async () => {
-      keyring = new HdKeyring({
-        mnemonic: sampleMnemonic,
-        numberOfAccounts: 1,
-      });
-
-      const address = firstAcct;
-
-      const appKeyAddress1 = await keyring.getAppKeyAddress(
-        address,
-        'someapp.origin.io',
-      );
-
-      expect(isValidAddress(appKeyAddress1)).toBe(true);
-
-      const appKeyAddress2 = await keyring.getAppKeyAddress(
-        address,
-        'someapp.origin.io',
-      );
-
-      expect(isValidAddress(appKeyAddress2)).toBe(true);
-
-      expect(appKeyAddress1).toStrictEqual(appKeyAddress2);
-    });
-  });
-
   describe('signing methods withAppKeyOrigin option', () => {
     it('should signPersonalMessage with the expected key when passed a withAppKeyOrigin', async () => {
       const address = firstAcct;
@@ -685,6 +615,277 @@ describe('hd-keyring', () => {
       await expect(
         keyring.signMessage(notKeyringAddress, message),
       ).rejects.toThrow('HD Keyring - Unable to find matching address.');
+    });
+  });
+
+  describe('#removeAccount', function () {
+    beforeEach(() => {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      });
+    });
+
+    describe('if the account exists', function () {
+      it('should remove that account', async function () {
+        const addresses = await keyring.getAccounts();
+        expect(addresses).toHaveLength(1);
+        keyring.removeAccount(addresses[0]);
+        const addressesAfterRemoval = await keyring.getAccounts();
+        expect(addressesAfterRemoval).toHaveLength(0);
+      });
+    });
+
+    describe('if the account does not exist', function () {
+      it('should throw an error', function () {
+        const unexistingAccount = '0x0000000000000000000000000000000000000000';
+        expect(() => keyring.removeAccount(unexistingAccount)).toThrow(
+          `Address ${unexistingAccount} not found in this keyring`,
+        );
+      });
+    });
+  });
+
+  describe('getAppKeyAddress', function () {
+    beforeEach(() => {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      });
+    });
+
+    it('should return a public address custom to the provided app key origin', async function () {
+      const appKeyAddress = await keyring.getAppKeyAddress(
+        firstAcct,
+        'someapp.origin.io',
+      );
+
+      expect(firstAcct).not.toBe(appKeyAddress);
+      expect(isValidAddress(appKeyAddress)).toBe(true);
+    });
+
+    it('should return different addresses when provided different app key origins', async function () {
+      const appKeyAddress1 = await keyring.getAppKeyAddress(
+        firstAcct,
+        'someapp.origin.io',
+      );
+
+      expect(isValidAddress(appKeyAddress1)).toBe(true);
+
+      const appKeyAddress2 = await keyring.getAppKeyAddress(
+        firstAcct,
+        'anotherapp.origin.io',
+      );
+
+      expect(isValidAddress(appKeyAddress2)).toBe(true);
+      expect(appKeyAddress1).not.toBe(appKeyAddress2);
+    });
+
+    it('should return the same address when called multiple times with the same params', async function () {
+      const appKeyAddress1 = await keyring.getAppKeyAddress(
+        firstAcct,
+        'someapp.origin.io',
+      );
+
+      expect(isValidAddress(appKeyAddress1)).toBe(true);
+
+      const appKeyAddress2 = await keyring.getAppKeyAddress(
+        firstAcct,
+        'someapp.origin.io',
+      );
+
+      expect(isValidAddress(appKeyAddress2)).toBe(true);
+      expect(appKeyAddress1).toBe(appKeyAddress2);
+    });
+
+    it('should throw error if the provided origin is not a string', async function () {
+      await expect(keyring.getAppKeyAddress(firstAcct, [])).rejects.toThrow(
+        `'origin' must be a non-empty string`,
+      );
+    });
+
+    it('should throw error if the provided origin is an empty string', async function () {
+      await expect(keyring.getAppKeyAddress(firstAcct, '')).rejects.toThrow(
+        `'origin' must be a non-empty string`,
+      );
+    });
+  });
+
+  describe('exportAccount', function () {
+    beforeEach(() => {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      });
+    });
+
+    it('should return a hex-encoded private key', async function () {
+      const expectedPrivateKeyResult =
+        '0xd3cc16948a02a91b9fcf83735653bf3dfd82c86543fdd1e9a828bd25e8a7b68d';
+      const privKeyHexValue = await keyring.exportAccount(firstAcct);
+
+      expect(expectedPrivateKeyResult).toBe(`0x${privKeyHexValue}`);
+    });
+
+    it('throw error if account is not present', async function () {
+      await expect(keyring.exportAccount(notKeyringAddress)).rejects.toThrow(
+        'HD Keyring - Unable to find matching address.',
+      );
+    });
+  });
+
+  describe('#encryptionPublicKey', function () {
+    const publicKey = 'LV7lWhd0mUDcvxkMU2o6uKXftu25zq4bMYdmMqppXic=';
+    beforeEach(() => {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      });
+    });
+
+    it('returns the expected value', async function () {
+      const encryptionPublicKey = await keyring.getEncryptionPublicKey(
+        firstAcct,
+      );
+      expect(publicKey).toBe(encryptionPublicKey);
+    });
+
+    it('throw error if address is blank', async function () {
+      await expect(keyring.getEncryptionPublicKey('')).rejects.toThrow(
+        'Must specify address.',
+      );
+    });
+
+    it('throw error if address is not present in the keyring', async function () {
+      await expect(
+        keyring.getEncryptionPublicKey(notKeyringAddress),
+      ).rejects.toThrow('HD Keyring - Unable to find matching address.');
+    });
+  });
+
+  describe('#signTypedData V4 signature verification', function () {
+    beforeEach(() => {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      });
+    });
+
+    const expectedSignature =
+      '0x220917664ef676d592bd709a5bffedaf69c5f6c72f13c6c4547a41d211f0923c3180893b1dec023433f11b664fabda22b74b57d21094f7798fc85b7650f8edbb1b';
+
+    it('returns the expected value', async function () {
+      const typedData = {
+        types: {
+          EIP712Domain: [
+            { name: 'name', type: 'string' },
+            { name: 'version', type: 'string' },
+            { name: 'chainId', type: 'uint256' },
+            { name: 'verifyingContract', type: 'address' },
+          ],
+          Person: [
+            { name: 'name', type: 'string' },
+            { name: 'wallets', type: 'address[]' },
+          ],
+          Mail: [
+            { name: 'from', type: 'Person' },
+            { name: 'to', type: 'Person[]' },
+            { name: 'contents', type: 'string' },
+          ],
+          Group: [
+            { name: 'name', type: 'string' },
+            { name: 'members', type: 'Person[]' },
+          ],
+        },
+        domain: {
+          name: 'Ether Mail',
+          version: '1',
+          chainId: 1,
+          verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+        },
+        primaryType: 'Mail',
+        message: {
+          from: {
+            name: 'Cow',
+            wallets: [
+              '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
+              '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF',
+            ],
+          },
+          to: [
+            {
+              name: 'Bob',
+              wallets: [
+                '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
+                '0xB0BdaBea57B0BDABeA57b0bdABEA57b0BDabEa57',
+                '0xB0B0b0b0b0b0B000000000000000000000000000',
+              ],
+            },
+          ],
+          contents: 'Hello, Bob!',
+        },
+      };
+
+      const addresses = await keyring.getAccounts();
+      const [address] = addresses;
+
+      const signature = await keyring.signTypedData(address, typedData, {
+        version: 'V4',
+      });
+      expect(signature).toBe(expectedSignature);
+      const restored = recoverTypedSignature({
+        data: typedData,
+        signature,
+        version: SignTypedDataVersion.V4,
+      });
+      expect(toChecksumAddress(restored)).toBe(address);
+    });
+  });
+
+  describe('#decryptMessage', function () {
+    // const address = '0xbe93f9bacbcffc8ee6663f2647917ed7a20a57bb';
+    // const privateKey = Buffer.from(
+    //   '6969696969696969696969696969696969696969696969696969696969696969',
+    //   'hex',
+    // );
+    // const privKeyHex = bufferToHex(privateKey);
+    const message = 'Hello world!';
+    let encryptedMessage;
+
+    beforeEach(async () => {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      });
+
+      const encryptionPublicKey = await keyring.getEncryptionPublicKey(
+        firstAcct,
+      );
+      encryptedMessage = encrypt({
+        publicKey: encryptionPublicKey,
+        data: message,
+        version: 'x25519-xsalsa20-poly1305',
+      });
+    });
+
+    it('returns the expected value', async function () {
+      const decryptedMessage = await keyring.decryptMessage(
+        firstAcct,
+        encryptedMessage,
+      );
+      expect(message).toBe(decryptedMessage);
+    });
+
+    it('throw error if address passed is not present in the keyring', async function () {
+      await expect(
+        keyring.decryptMessage(notKeyringAddress, encryptedMessage),
+      ).rejects.toThrow('HD Keyring - Unable to find matching address.');
+    });
+
+    it('throw error if wrong encrypted data object is passed', async function () {
+      await expect(keyring.decryptMessage(firstAcct, {})).rejects.toThrow(
+        'Encryption type/version not supported.',
+      );
     });
   });
 });
