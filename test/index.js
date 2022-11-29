@@ -28,13 +28,13 @@ describe('hd-keyring', () => {
   });
 
   describe('compare old bip39 implementation with new', () => {
-    it('should derive the same accounts from the same mnemonics', () => {
+    it('should derive the same accounts from the same mnemonics', async () => {
       const mnemonics = [];
       for (let i = 0; i < 99; i++) {
         mnemonics.push(oldMMForkBIP39.generateMnemonic());
       }
 
-      Promise.all(
+      await Promise.all(
         mnemonics.map(async (mnemonic) => {
           const newHDKeyring = new HdKeyring({ mnemonic, numberOfAccounts: 3 });
           const oldHDKeyring = new OldHdKeyring({
