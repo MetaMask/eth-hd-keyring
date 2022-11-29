@@ -252,7 +252,7 @@ class HdKeyring {
       );
     });
     if (!wallet) {
-      throw new Error('Simple Keyring - Unable to find matching address.');
+      throw new Error('HD Keyring - Unable to find matching address.');
     }
 
     if (opts.withAppKeyOrigin) {

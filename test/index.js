@@ -8,8 +8,16 @@ const {
 } = require('@metamask/eth-sig-util');
 const { wordlist } = require('@metamask/scure-bip39/dist/wordlists/english');
 const oldMMForkBIP39 = require('@metamask/bip39');
-const { isValidAddress, toChecksumAddress } = require('@ethereumjs/util');
+const {
+  isValidAddress,
+  toChecksumAddress,
+  bufferToHex,
+  toBuffer,
+  ecrecover,
+  pubToAddress,
+} = require('@ethereumjs/util');
 const OldHdKeyring = require('@metamask/eth-hd-keyring');
+const { keccak256 } = require('ethereum-cryptography/keccak');
 const HdKeyring = require('..');
 
 // Sample account:
@@ -20,6 +28,8 @@ const sampleMnemonic =
   'finish oppose decorate face calm tragic certain desk hour urge dinosaur mango';
 const firstAcct = '0x1c96099350f13D558464eC79B9bE4445AA0eF579';
 const secondAcct = '0x1b00AeD43a693F3a957F9FeB5cC08AFA031E37a0';
+
+const notKeyringAddress = '0xbD20F6F5F1616947a39E11926E78ec94817B3931';
 
 describe('hd-keyring', () => {
   let keyring;
@@ -594,6 +604,87 @@ describe('hd-keyring', () => {
         version: SignTypedDataVersion.V3,
       });
       expect(sig).toStrictEqual(expectedSig);
+    });
+  });
+
+  // /
+  /* TESTS FOR BASE-KEYRING METHODS */
+  // /
+
+  describe('#signMessage', function () {
+    const message =
+      '0x879a053d4800c6354e76c7985a865d2922c82fb5b3f4577b2fe08b998954f2e0';
+    const expectedResult =
+      '0xb21867b2221db0172e970b7370825b71c57823ff8714168ce9748f32f450e2c43d0fe396eb5b5f59284b7fd108c8cf61a6180a6756bdd3d4b7b9ccc4ac6d51611b';
+
+    it('passes the dennis test', async function () {
+      await keyring.deserialize({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      });
+      const result = await keyring.signMessage(firstAcct, message);
+      expect(result).toBe(expectedResult);
+    });
+
+    it('reliably can decode messages it signs', async function () {
+      await keyring.deserialize({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      });
+      const localMessage = 'hello there!';
+      const msgHashHex = bufferToHex(keccak256(Buffer.from(localMessage)));
+      await keyring.addAccounts(9);
+      const addresses = await keyring.getAccounts();
+      const signatures = await Promise.all(
+        addresses.map(async (accountAddress) => {
+          return await keyring.signMessage(accountAddress, msgHashHex);
+        }),
+      );
+      signatures.forEach((sgn, index) => {
+        const accountAddress = addresses[index];
+
+        const r = toBuffer(sgn.slice(0, 66));
+        const s = toBuffer(`0x${sgn.slice(66, 130)}`);
+        const v = BigInt(`0x${sgn.slice(130, 132)}`);
+        const m = toBuffer(msgHashHex);
+        const pub = ecrecover(m, v, r, s);
+        const adr = `0x${pubToAddress(pub).toString('hex')}`;
+
+        expect(toChecksumAddress(adr)).toBe(accountAddress);
+      });
+    });
+
+    it('throw error for invalid message', async function () {
+      await keyring.deserialize({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      });
+
+      await expect(keyring.signMessage(firstAcct, '')).rejects.toThrow(
+        'Cannot convert 0x to a BigInt',
+      );
+    });
+
+    it('throw error if empty address is passed', async function () {
+      await keyring.deserialize({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      });
+
+      await expect(keyring.signMessage('', message)).rejects.toThrow(
+        'Must specify address.',
+      );
+    });
+
+    it('throw error if address not associated with the current keyring is passed', async function () {
+      await keyring.deserialize({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      });
+
+      await expect(
+        keyring.signMessage(notKeyringAddress, message),
+      ).rejects.toThrow('HD Keyring - Unable to find matching address.');
     });
   });
 });
