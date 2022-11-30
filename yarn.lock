@@ -345,6 +345,7 @@
   integrity sha512-aWGrrZgQ8yZW5wEHWVji71+goJYM+Z+XyDpVU1KaT56wJJE0qHEqhjULfiTS+VEl27YTc13/hO2HLSXeZ4YGww==
   dependencies:
     "@ethereumjs/rlp" "^4.0.0-beta.2"
+    async "^3.2.4"
     ethereum-cryptography "^1.1.2"
 
 "@ethersproject/abi@5.7.0", "@ethersproject/abi@^5.7.0":
@@ -1003,7 +1004,7 @@
     tweetnacl "^1.0.3"
     tweetnacl-util "^0.15.1"
 
-"@metamask/eth-sig-util@^5.0.1":
+"@metamask/eth-sig-util@^5.0.2":
   version "5.0.2"
   resolved "https://registry.yarnpkg.com/@metamask/eth-sig-util/-/eth-sig-util-5.0.2.tgz#c518279a6e17a88135a13d53a0b970f145ff8bce"
   integrity sha512-RU6fG/H6/UlBol221uBkq5C7w3TwLK611nEZliO2u+kO0vHKGBXnIPlhI0tzKUigjhUeOd9mhCNbNvhh0LKt9Q==
@@ -1014,16 +1015,6 @@
     ethjs-util "^0.1.6"
     tweetnacl "^1.0.3"
     tweetnacl-util "^0.15.1"
-
-"@metamask/eth-simple-keyring@^5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@metamask/eth-simple-keyring/-/eth-simple-keyring-5.0.0.tgz#307772d1aa3298e41a2444b428cd8f4522b7bf5c"
-  integrity sha512-UJfP36Z9g1eeD8mSHWaVqUvkgbgYm3S7YuzlMzQi+WgPnWu81CdbldMMtvreTlu4I1mTyljXLDMjIp65P0bygQ==
-  dependencies:
-    "@ethereumjs/util" "^8.0.0"
-    "@metamask/eth-sig-util" "^5.0.1"
-    ethereum-cryptography "^1.1.2"
-    randombytes "^2.1.0"
 
 "@metamask/scure-bip39@^2.0.3":
   version "2.0.3"
@@ -2474,7 +2465,7 @@ ethereumjs-util@^7.0.9, ethereumjs-util@^7.1.2:
     ethereum-cryptography "^0.1.3"
     rlp "^2.2.4"
 
-ethereumjs-wallet@^1.0.1:
+ethereumjs-wallet@^1.0.1, ethereumjs-wallet@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/ethereumjs-wallet/-/ethereumjs-wallet-1.0.2.tgz#2c000504b4c71e8f3782dabe1113d192522e99b6"
   integrity sha512-CCWV4RESJgRdHIvFciVQFnCHfqyhXWchTPlkfp28Qc53ufs+doi5I/cV2+xeK9+qEo25XCWfP9MiL+WEPAZfdA==

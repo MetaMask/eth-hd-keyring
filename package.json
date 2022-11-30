@@ -26,10 +26,11 @@
     "test": "jest"
   },
   "dependencies": {
-    "@metamask/eth-sig-util": "^4.0.0",
-    "@metamask/eth-simple-keyring": "^5.0.0",
+    "@ethereumjs/util": "^8.0.2",
+    "@metamask/eth-sig-util": "^5.0.2",
     "@metamask/scure-bip39": "^2.0.3",
-    "ethereum-cryptography": "^1.1.2"
+    "ethereum-cryptography": "^1.1.2",
+    "ethereumjs-wallet": "^1.0.2"
   },
   "devDependencies": {
     "@ethereumjs/tx": "^4.0.1",
