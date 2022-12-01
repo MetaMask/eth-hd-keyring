@@ -296,11 +296,6 @@ class HdKeyring {
     this.hdWallet = hdkey.fromMasterSeed(seed);
     this.root = this.hdWallet.derivePath(this.hdPath);
   }
-  // _AddressfromPublicKey(publicKey) {
-  //   const pub = Point.fromHex(publicKey).toRawBytes(false);
-  //   const addr = bytesToHex(keccak256(pub.slice(1, 65))).slice(24);
-  //   return toChecksumAddress(`0x${addr}`);
-  // }
 }
 
 HdKeyring.type = type;
