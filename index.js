@@ -1,5 +1,5 @@
 const { hdkey } = require('ethereumjs-wallet');
-const SimpleKeyring = require('eth-simple-keyring');
+const SimpleKeyring = require('@metamask/eth-simple-keyring');
 const bip39 = require('@metamask/scure-bip39');
 const { wordlist } = require('@metamask/scure-bip39/dist/wordlists/english');
 const { normalize } = require('@metamask/eth-sig-util');
@@ -65,7 +65,7 @@ class HdKeyring extends SimpleKeyring {
   serialize() {
     return Promise.resolve({
       mnemonic: this.mnemonicToUint8Array(this.mnemonic),
-      numberOfAccounts: this.wallets.length,
+      numberOfAccounts: this._wallets.length,
       hdPath: this.hdPath,
     });
   }
@@ -83,7 +83,7 @@ class HdKeyring extends SimpleKeyring {
       );
     }
     this.opts = opts;
-    this.wallets = [];
+    this._wallets = [];
     this.mnemonic = null;
     this.root = null;
     this.hdPath = opts.hdPath || hdPathString;
@@ -104,13 +104,13 @@ class HdKeyring extends SimpleKeyring {
       throw new Error('Eth-Hd-Keyring: No secret recovery phrase provided');
     }
 
-    const oldLen = this.wallets.length;
+    const oldLen = this._wallets.length;
     const newWallets = [];
     for (let i = oldLen; i < numberOfAccounts + oldLen; i++) {
       const child = this.root.deriveChild(i);
       const wallet = child.getWallet();
       newWallets.push(wallet);
-      this.wallets.push(wallet);
+      this._wallets.push(wallet);
     }
     const hexWallets = newWallets.map((w) => {
       return normalize(w.getAddress().toString('hex'));
@@ -120,7 +120,7 @@ class HdKeyring extends SimpleKeyring {
 
   getAccounts() {
     return Promise.resolve(
-      this.wallets.map((w) => {
+      this._wallets.map((w) => {
         return normalize(w.getAddress().toString('hex'));
       }),
     );
