@@ -5,7 +5,6 @@ const { bytesToHex } = require('ethereum-cryptography/utils');
 const {
   stripHexPrefix,
   privateToPublic,
-  bufferToHex,
   publicToAddress,
   ecsign,
   arrToBufArr,
@@ -159,7 +158,7 @@ class HdKeyring {
   // exportAccount should return a hex-encoded private key:
   async exportAccount(address, opts = {}) {
     const wallet = this._getWalletForAccount(address, opts);
-    return wallet.privateKey.toString('hex');
+    return bytesToHex(wallet.privKeyBytes);
   }
 
   // tx is an instance of the ethereumjs-transaction class.
@@ -213,18 +212,15 @@ class HdKeyring {
   removeAccount(address) {
     if (
       !this._wallets
-        .map(({ publicKey }) =>
-          bufferToHex(publicToAddress(publicKey)).toLowerCase(),
-        )
-        .includes(address.toLowerCase())
+        .map(({ publicKey }) => this._AddressfromPublicKey(publicKey))
+        .includes(toChecksumAddress(address))
     ) {
       throw new Error(`Address ${address} not found in this keyring`);
     }
 
     this._wallets = this._wallets.filter(
       ({ publicKey }) =>
-        bufferToHex(publicToAddress(publicKey)).toLowerCase() !==
-        address.toLowerCase(),
+        this._AddressfromPublicKey(publicKey) !== toChecksumAddress(address),
     );
   }
 
@@ -247,131 +243,7 @@ class HdKeyring {
     const address = normalize(account);
     let wallet = this._wallets.find(({ publicKey }) => {
       return (
-        this._AddressfromPublicKey(publicKey).toLowerCase() ===
-        address.toLowerCase()
-      );
-    });
-    if (!wallet) {
-      throw new Error('Simple Keyring - Unable to find matching address.');
-    }
-
-    if (opts.withAppKeyOrigin) {
-      const { privateKey } = wallet;
-      const appKeyOriginBuffer = Buffer.from(opts.withAppKeyOrigin, 'utf8');
-      const appKeyBuffer = Buffer.concat([privateKey, appKeyOriginBuffer]);
-      const appKeyPrivateKey = arrToBufArr(keccak256(appKeyBuffer, 256));
-      const appKeyPublicKey = privateToPublic(appKeyPrivateKey);
-      wallet = { privateKey: appKeyPrivateKey, publicKey: appKeyPublicKey };
-    }
-
-    return wallet;
-  }
-
-  /* BASE KEYRING METHODS */
-
-  // returns an address specific to an app
-  async getAppKeyAddress(address, origin) {
-    if (!origin || typeof origin !== 'string') {
-      throw new Error(`'origin' must be a non-empty string`);
-    }
-    const wallet = this._getWalletForAccount(address, {
-      withAppKeyOrigin: origin,
-    });
-    const appKeyAddress = normalize(
-      publicToAddress(wallet.publicKey).toString('hex'),
-    );
-    return appKeyAddress;
-  }
-
-  // exportAccount should return a hex-encoded private key:
-  async exportAccount(address, opts = {}) {
-    const wallet = this._getWalletForAccount(address, opts);
-    return wallet.privateKey.toString('hex');
-  }
-
-  // tx is an instance of the ethereumjs-transaction class.
-  async signTransaction(address, tx, opts = {}) {
-    const privKey = this._getPrivateKeyFor(address, opts);
-    const signedTx = tx.sign(privKey);
-    // Newer versions of Ethereumjs-tx are immutable and return a new tx object
-    return signedTx === undefined ? tx : signedTx;
-  }
-
-  // For eth_sign, we need to sign arbitrary data:
-  async signMessage(address, data, opts = {}) {
-    const message = stripHexPrefix(data);
-    const privKey = this._getPrivateKeyFor(address, opts);
-    const msgSig = ecsign(Buffer.from(message, 'hex'), privKey);
-    const rawMsgSig = concatSig(msgSig.v, msgSig.r, msgSig.s);
-    return rawMsgSig;
-  }
-
-  // For personal_sign, we need to prefix the message:
-  async signPersonalMessage(address, msgHex, opts = {}) {
-    const privKey = this._getPrivateKeyFor(address, opts);
-    const privateKey = Buffer.from(privKey, 'hex');
-    const sig = personalSign({ privateKey, data: msgHex });
-    return sig;
-  }
-
-  // For eth_decryptMessage:
-  async decryptMessage(withAccount, encryptedData) {
-    const wallet = this._getWalletForAccount(withAccount);
-    const { privateKey } = wallet;
-    const sig = decrypt({ privateKey, encryptedData });
-    return sig;
-  }
-
-  // personal_signTypedData, signs data along with the schema
-  async signTypedData(
-    withAccount,
-    typedData,
-    opts = { version: SignTypedDataVersion.V1 },
-  ) {
-    // Treat invalid versions as "V1"
-    const version = Object.keys(SignTypedDataVersion).includes(opts.version)
-      ? opts.version
-      : SignTypedDataVersion.V1;
-
-    const privateKey = this._getPrivateKeyFor(withAccount, opts);
-    return signTypedData({ privateKey, data: typedData, version });
-  }
-
-  removeAccount(address) {
-    if (
-      !this._wallets
-        .map((w) => normalize(w.getAddress().toString('hex')))
-        .includes(address.toLowerCase())
-    ) {
-      throw new Error(`Address ${address} not found in this keyring`);
-    }
-
-    this._wallets = this._wallets.filter(
-      (w) =>
-        normalize(w.getAddress().toString('hex')) !== address.toLowerCase(),
-    );
-  }
-
-  // get public key for nacl
-  async getEncryptionPublicKey(withAccount, opts = {}) {
-    const privKey = this._getPrivateKeyFor(withAccount, opts);
-    const publicKey = getEncryptionPublicKey(privKey);
-    return publicKey;
-  }
-
-  _getPrivateKeyFor(address, opts = {}) {
-    if (!address) {
-      throw new Error('Must specify address.');
-    }
-    const wallet = this._getWalletForAccount(address, opts);
-    return wallet.privateKey;
-  }
-
-  _getWalletForAccount(account, opts = {}) {
-    const address = normalize(account);
-    let wallet = this._wallets.find((w) => {
-      return (
-        normalize(w.getAddress().toString('hex')) === address.toLowerCase()
+        this._AddressfromPublicKey(publicKey) === toChecksumAddress(address)
       );
     });
     if (!wallet) {

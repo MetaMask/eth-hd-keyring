@@ -15,6 +15,7 @@ const {
   toBuffer,
   ecrecover,
   pubToAddress,
+  toChecksumAddress,
 } = require('@ethereumjs/util');
 const {
   TransactionFactory,
@@ -58,11 +59,17 @@ describe('hd-keyring', () => {
           });
           const newAccounts = await newHDKeyring.getAccounts();
           const oldAccounts = await oldHDKeyring.getAccounts();
-          await expect(newAccounts[0]).toStrictEqual(oldAccounts[0]);
+          await expect(newAccounts[0]).toStrictEqual(
+            toChecksumAddress(oldAccounts[0]),
+          );
 
-          await expect(newAccounts[1]).toStrictEqual(oldAccounts[1]);
+          await expect(newAccounts[1]).toStrictEqual(
+            toChecksumAddress(oldAccounts[1]),
+          );
 
-          await expect(newAccounts[2]).toStrictEqual(oldAccounts[2]);
+          await expect(newAccounts[2]).toStrictEqual(
+            toChecksumAddress(oldAccounts[2]),
+          );
         }),
       );
     });
@@ -578,7 +585,7 @@ describe('hd-keyring', () => {
         const pub = ecrecover(m, v, r, s);
         const adr = `0x${pubToAddress(pub).toString('hex')}`;
 
-        expect(adr).toBe(accountAddress);
+        expect(toChecksumAddress(adr)).toBe(accountAddress);
       });
     });
 
@@ -836,7 +843,7 @@ describe('hd-keyring', () => {
         signature,
         version: SignTypedDataVersion.V4,
       });
-      expect(restored).toBe(address);
+      expect(toChecksumAddress(restored)).toBe(address);
     });
   });
 
