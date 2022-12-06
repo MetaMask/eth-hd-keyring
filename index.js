@@ -291,6 +291,7 @@ class HdKeyring {
     this.root = this.hdWallet.derive(this.hdPath);
   }
 
+  // small helper function to convert publicKey in Uint8Array form to a publicAddress as a hex
   _addressfromPublicKey(publicKey) {
     return bufferToHex(publicToAddress(Buffer.from(publicKey), true));
   }
