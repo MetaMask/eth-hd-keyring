@@ -130,13 +130,13 @@ class HdKeyring {
       this._wallets.push(wallet);
     }
     const hexWallets = newWallets.map((w) => {
-      return this._AddressfromPublicKey(w.publicKey);
+      return this._addressfromPublicKey(w.publicKey);
     });
     return Promise.resolve(hexWallets);
   }
 
   getAccounts() {
-    return this._wallets.map((w) => this._AddressfromPublicKey(w.publicKey));
+    return this._wallets.map((w) => this._addressfromPublicKey(w.publicKey));
   }
 
   /* BASE KEYRING METHODS */
@@ -212,7 +212,7 @@ class HdKeyring {
   removeAccount(address) {
     if (
       !this._wallets
-        .map(({ publicKey }) => this._AddressfromPublicKey(publicKey))
+        .map(({ publicKey }) => this._addressfromPublicKey(publicKey))
         .includes(toChecksumAddress(address))
     ) {
       throw new Error(`Address ${address} not found in this keyring`);
@@ -220,7 +220,7 @@ class HdKeyring {
 
     this._wallets = this._wallets.filter(
       ({ publicKey }) =>
-        this._AddressfromPublicKey(publicKey) !== toChecksumAddress(address),
+        this._addressfromPublicKey(publicKey) !== toChecksumAddress(address),
     );
   }
 
@@ -243,7 +243,7 @@ class HdKeyring {
     const address = normalize(account);
     let wallet = this._wallets.find(({ publicKey }) => {
       return (
-        this._AddressfromPublicKey(publicKey) === toChecksumAddress(address)
+        this._addressfromPublicKey(publicKey) === toChecksumAddress(address)
       );
     });
     if (!wallet) {
@@ -295,7 +295,7 @@ class HdKeyring {
     this.root = this.hdWallet.derive(this.hdPath);
   }
 
-  _AddressfromPublicKey(publicKey) {
+  _addressfromPublicKey(publicKey) {
     const pub = Point.fromHex(publicKey).toRawBytes(false);
     const addr = bytesToHex(keccak256(pub.slice(1, 65))).slice(24);
     return toChecksumAddress(`0x${addr}`);
