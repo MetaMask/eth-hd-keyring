@@ -1,6 +1,5 @@
 const { HDKey } = require('ethereum-cryptography/hdkey');
 const { keccak256 } = require('ethereum-cryptography/keccak');
-const { Point } = require('ethereum-cryptography/secp256k1');
 const { bytesToHex } = require('ethereum-cryptography/utils');
 const {
   stripHexPrefix,
@@ -8,6 +7,7 @@ const {
   publicToAddress,
   ecsign,
   arrToBufArr,
+  bufferToHex,
 } = require('@ethereumjs/util');
 const bip39 = require('@metamask/scure-bip39');
 const { wordlist } = require('@metamask/scure-bip39/dist/wordlists/english');
@@ -292,9 +292,7 @@ class HdKeyring {
   }
 
   _addressfromPublicKey(publicKey) {
-    const pub = Point.fromHex(publicKey).toRawBytes(false);
-    const addr = bytesToHex(keccak256(pub.slice(1, 65))).slice(24);
-    return `0x${addr}`;
+    return bufferToHex(publicToAddress(Buffer.from(publicKey), true));
   }
 }
 
