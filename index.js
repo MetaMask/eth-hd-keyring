@@ -83,7 +83,7 @@ class HdKeyring {
   serialize() {
     return Promise.resolve({
       mnemonic: this.mnemonicToUint8Array(this.mnemonic),
-      numberOfAccounts: this.getAccounts().length,
+      numberOfAccounts: this._wallets.length,
       hdPath: this.hdPath,
     });
   }
