@@ -8,7 +8,6 @@ const {
   publicToAddress,
   ecsign,
   arrToBufArr,
-  toChecksumAddress,
 } = require('@ethereumjs/util');
 const bip39 = require('@metamask/scure-bip39');
 const { wordlist } = require('@metamask/scure-bip39/dist/wordlists/english');
@@ -213,14 +212,13 @@ class HdKeyring {
     if (
       !this._wallets
         .map(({ publicKey }) => this._addressfromPublicKey(publicKey))
-        .includes(toChecksumAddress(address))
+        .includes(address)
     ) {
       throw new Error(`Address ${address} not found in this keyring`);
     }
 
     this._wallets = this._wallets.filter(
-      ({ publicKey }) =>
-        this._addressfromPublicKey(publicKey) !== toChecksumAddress(address),
+      ({ publicKey }) => this._addressfromPublicKey(publicKey) !== address,
     );
   }
 
@@ -242,9 +240,7 @@ class HdKeyring {
   _getWalletForAccount(account, opts = {}) {
     const address = normalize(account);
     let wallet = this._wallets.find(({ publicKey }) => {
-      return (
-        this._addressfromPublicKey(publicKey) === toChecksumAddress(address)
-      );
+      return this._addressfromPublicKey(publicKey) === address;
     });
     if (!wallet) {
       throw new Error('HD Keyring - Unable to find matching address.');
@@ -298,7 +294,7 @@ class HdKeyring {
   _addressfromPublicKey(publicKey) {
     const pub = Point.fromHex(publicKey).toRawBytes(false);
     const addr = bytesToHex(keccak256(pub.slice(1, 65))).slice(24);
-    return toChecksumAddress(`0x${addr}`);
+    return `0x${addr}`;
   }
 }
 
