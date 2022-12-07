@@ -151,13 +151,14 @@ class HdKeyring {
     const appKeyAddress = normalize(
       publicToAddress(wallet.publicKey).toString('hex'),
     );
+
     return appKeyAddress;
   }
 
   // exportAccount should return a hex-encoded private key:
   async exportAccount(address, opts = {}) {
     const wallet = this._getWalletForAccount(address, opts);
-    return bytesToHex(wallet.privKeyBytes);
+    return bytesToHex(wallet.privateKey);
   }
 
   // tx is an instance of the ethereumjs-transaction class.
@@ -188,8 +189,9 @@ class HdKeyring {
   // For eth_decryptMessage:
   async decryptMessage(withAccount, encryptedData) {
     const wallet = this._getWalletForAccount(withAccount);
-    const { privateKey } = wallet;
-    const sig = decrypt({ privateKey, encryptedData });
+    const { privateKey: privateKeyAsUint8Array } = wallet;
+    const privateKeyAsHex = Buffer.from(privateKeyAsUint8Array).toString('hex');
+    const sig = decrypt({ privateKey: privateKeyAsHex, encryptedData });
     return sig;
   }
 
@@ -208,7 +210,8 @@ class HdKeyring {
     return signTypedData({ privateKey, data: typedData, version });
   }
 
-  removeAccount(address) {
+  removeAccount(account) {
+    const address = normalize(account);
     if (
       !this._wallets
         .map(({ publicKey }) => this._addressfromPublicKey(publicKey))
@@ -293,7 +296,9 @@ class HdKeyring {
 
   // small helper function to convert publicKey in Uint8Array form to a publicAddress as a hex
   _addressfromPublicKey(publicKey) {
-    return bufferToHex(publicToAddress(Buffer.from(publicKey), true));
+    return bufferToHex(
+      publicToAddress(Buffer.from(publicKey), true),
+    ).toLowerCase();
   }
 }
 
