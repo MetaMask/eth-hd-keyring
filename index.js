@@ -1,11 +1,13 @@
-const { hdkey } = require('ethereumjs-wallet');
+const { HDKey } = require('ethereum-cryptography/hdkey');
 const { keccak256 } = require('ethereum-cryptography/keccak');
+const { bytesToHex } = require('ethereum-cryptography/utils');
 const {
   stripHexPrefix,
   privateToPublic,
   publicToAddress,
   ecsign,
   arrToBufArr,
+  bufferToHex,
 } = require('@ethereumjs/util');
 const bip39 = require('@metamask/scure-bip39');
 const { wordlist } = require('@metamask/scure-bip39/dist/wordlists/english');
@@ -122,23 +124,18 @@ class HdKeyring {
     const oldLen = this._wallets.length;
     const newWallets = [];
     for (let i = oldLen; i < numberOfAccounts + oldLen; i++) {
-      const child = this.root.deriveChild(i);
-      const wallet = child.getWallet();
+      const wallet = this.root.deriveChild(i);
       newWallets.push(wallet);
       this._wallets.push(wallet);
     }
     const hexWallets = newWallets.map((w) => {
-      return normalize(w.getAddress().toString('hex'));
+      return this._addressfromPublicKey(w.publicKey);
     });
     return Promise.resolve(hexWallets);
   }
 
   getAccounts() {
-    return Promise.resolve(
-      this._wallets.map((w) => {
-        return normalize(w.getAddress().toString('hex'));
-      }),
-    );
+    return this._wallets.map((w) => this._addressfromPublicKey(w.publicKey));
   }
 
   /* BASE KEYRING METHODS */
@@ -154,13 +151,14 @@ class HdKeyring {
     const appKeyAddress = normalize(
       publicToAddress(wallet.publicKey).toString('hex'),
     );
+
     return appKeyAddress;
   }
 
   // exportAccount should return a hex-encoded private key:
   async exportAccount(address, opts = {}) {
     const wallet = this._getWalletForAccount(address, opts);
-    return wallet.privateKey.toString('hex');
+    return bytesToHex(wallet.privateKey);
   }
 
   // tx is an instance of the ethereumjs-transaction class.
@@ -191,8 +189,9 @@ class HdKeyring {
   // For eth_decryptMessage:
   async decryptMessage(withAccount, encryptedData) {
     const wallet = this._getWalletForAccount(withAccount);
-    const { privateKey } = wallet;
-    const sig = decrypt({ privateKey, encryptedData });
+    const { privateKey: privateKeyAsUint8Array } = wallet;
+    const privateKeyAsHex = Buffer.from(privateKeyAsUint8Array).toString('hex');
+    const sig = decrypt({ privateKey: privateKeyAsHex, encryptedData });
     return sig;
   }
 
@@ -211,18 +210,18 @@ class HdKeyring {
     return signTypedData({ privateKey, data: typedData, version });
   }
 
-  removeAccount(address) {
+  removeAccount(account) {
+    const address = normalize(account);
     if (
       !this._wallets
-        .map((w) => normalize(w.getAddress().toString('hex')))
-        .includes(address.toLowerCase())
+        .map(({ publicKey }) => this._addressfromPublicKey(publicKey))
+        .includes(address)
     ) {
       throw new Error(`Address ${address} not found in this keyring`);
     }
 
     this._wallets = this._wallets.filter(
-      (w) =>
-        normalize(w.getAddress().toString('hex')) !== address.toLowerCase(),
+      ({ publicKey }) => this._addressfromPublicKey(publicKey) !== address,
     );
   }
 
@@ -243,10 +242,8 @@ class HdKeyring {
 
   _getWalletForAccount(account, opts = {}) {
     const address = normalize(account);
-    let wallet = this._wallets.find((w) => {
-      return (
-        normalize(w.getAddress().toString('hex')) === address.toLowerCase()
-      );
+    let wallet = this._wallets.find(({ publicKey }) => {
+      return this._addressfromPublicKey(publicKey) === address;
     });
     if (!wallet) {
       throw new Error('HD Keyring - Unable to find matching address.');
@@ -293,8 +290,15 @@ class HdKeyring {
 
     // eslint-disable-next-line node/no-sync
     const seed = bip39.mnemonicToSeedSync(this.mnemonic, wordlist);
-    this.hdWallet = hdkey.fromMasterSeed(seed);
-    this.root = this.hdWallet.derivePath(this.hdPath);
+    this.hdWallet = HDKey.fromMasterSeed(seed);
+    this.root = this.hdWallet.derive(this.hdPath);
+  }
+
+  // small helper function to convert publicKey in Uint8Array form to a publicAddress as a hex
+  _addressfromPublicKey(publicKey) {
+    return bufferToHex(
+      publicToAddress(Buffer.from(publicKey), true),
+    ).toLowerCase();
   }
 }
 
