@@ -21,8 +21,7 @@
     "lint": "yarn lint:eslint && yarn lint:misc --check",
     "lint:eslint": "eslint . --cache --ext js,ts",
     "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
-    "lint:misc": "prettier '**/*.json' '**/*.md' '!CHANGELOG.md' '**/*.yml' --ignore-path .gitignore",
-    "setup": "yarn install && yarn allow-scripts",
+    "lint:misc": "prettier '**/*.json' '**/*.md' '!CHANGELOG.md' '**/*.yml' '!.yarnrc.yml' --ignore-path .gitignore --no-error-on-unmatched-pattern",
     "test": "jest"
   },
   "dependencies": {
@@ -33,13 +32,13 @@
   },
   "devDependencies": {
     "@ethereumjs/tx": "^4.0.1",
-    "@lavamoat/allow-scripts": "^1.0.6",
+    "@lavamoat/allow-scripts": "^2.1.0",
     "@metamask/auto-changelog": "^2.5.0",
     "@metamask/bip39": "^4.0.0",
     "@metamask/eslint-config": "^8.0.0",
     "@metamask/eslint-config-jest": "^9.0.0",
     "@metamask/eslint-config-nodejs": "^8.0.0",
-    "@metamask/eth-hd-keyring": "4.0.2",
+    "@metamask/eth-hd-keyring": "4.0.1",
     "@types/jest": "^27.4.1",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
@@ -51,6 +50,7 @@
     "prettier": "^2.4.1",
     "prettier-plugin-packagejson": "^2.2.12"
   },
+  "packageManager": "yarn@3.3.0",
   "engines": {
     "node": ">= 14.0.0"
   },
@@ -61,8 +61,8 @@
   "lavamoat": {
     "allowScripts": {
       "@lavamoat/preinstall-always-fail": false,
-      "keccak": false,
-      "secp256k1": false
+      "@metamask/eth-hd-keyring>ethereumjs-util>ethereum-cryptography>keccak": false,
+      "@metamask/eth-hd-keyring>ethereumjs-util>ethereum-cryptography>secp256k1": false
     }
   }
 }
