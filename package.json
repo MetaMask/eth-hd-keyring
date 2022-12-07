@@ -61,8 +61,6 @@
   "lavamoat": {
     "allowScripts": {
       "@lavamoat/preinstall-always-fail": false,
-      "keccak": false,
-      "secp256k1": false,
       "@metamask/eth-hd-keyring>ethereumjs-util>ethereum-cryptography>keccak": false,
       "@metamask/eth-hd-keyring>ethereumjs-util>ethereum-cryptography>secp256k1": false
     }
