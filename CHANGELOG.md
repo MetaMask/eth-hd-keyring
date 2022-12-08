@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.0]
+### Uncategorized
+- update github actions to use latest module template versions ([#73](https://github.com/MetaMask/eth-hd-keyring/pull/73))
+- yarn v3 ([#72](https://github.com/MetaMask/eth-hd-keyring/pull/72))
+- Replace `ethereumjs-wallet`'s `hdkey` with `ethereum-cryptography`'s version ([#69](https://github.com/MetaMask/eth-hd-keyring/pull/69))
+- bump `eth-sig-util` version to 5.0.2, stop inheriting from `eth-simple-keyring` ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
+- bump eth-simple-keyring version to v5 ([#71](https://github.com/MetaMask/eth-hd-keyring/pull/71))
+- integrate MM @scure/bip39 fork once released ([#67](https://github.com/MetaMask/eth-hd-keyring/pull/67))
+
 ## [4.0.2]
 ### Added
 - Add parameter validation for constructor / `deserialize` method ([#65](https://github.com/MetaMask/eth-hd-keyring/pull/65))
@@ -30,7 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Deserialize method (and `HdKeyring` constructor by extension) can no longer be passed an options object containing a value for `numberOfAccounts` if it is not also containing a value for `mnemonic`.
 - Package name changed from `eth-hd-keyring` to `@metamask/eth-hd-keyring`.
 
-[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.2...HEAD
+[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.0...HEAD
+[5.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.2...v5.0.0
 [4.0.2]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/MetaMask/eth-hd-keyring/releases/tag/v4.0.0
