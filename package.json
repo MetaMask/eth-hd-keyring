@@ -22,8 +22,8 @@
     "lint:eslint": "eslint . --cache --ext js,ts",
     "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
     "lint:misc": "prettier '**/*.json' '**/*.md' '!CHANGELOG.md' '**/*.yml' '!.yarnrc.yml' --ignore-path .gitignore --no-error-on-unmatched-pattern",
-    "test": "jest",
-    "prepack": "./scripts/prepack.sh" 
+    "prepack": "chmod +x ./scripts/prepack.sh",
+    "test": "jest"
   },
   "dependencies": {
     "@ethereumjs/util": "^8.0.2",
