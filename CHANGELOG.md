@@ -7,13 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [5.0.0]
-### Uncategorized
-- update github actions to use latest module template versions ([#73](https://github.com/MetaMask/eth-hd-keyring/pull/73))
-- yarn v3 ([#72](https://github.com/MetaMask/eth-hd-keyring/pull/72))
-- Replace `ethereumjs-wallet`'s `hdkey` with `ethereum-cryptography`'s version ([#69](https://github.com/MetaMask/eth-hd-keyring/pull/69))
-- bump `eth-sig-util` version to 5.0.2, stop inheriting from `eth-simple-keyring` ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
-- bump eth-simple-keyring version to v5 ([#71](https://github.com/MetaMask/eth-hd-keyring/pull/71))
-- integrate MM @scure/bip39 fork once released ([#67](https://github.com/MetaMask/eth-hd-keyring/pull/67))
+### Changed
+- **BREAKING**: Update minimum Node.js version from v12 to v14 ([#67](https://github.com/MetaMask/eth-hd-keyring/pull/67))
+- **BREAKING:** Makes version-specific `signTypedData` methods private ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
+    - Consumers should use the generic `signTypedData` method and pass the version they'd like as a property in the options argument.
+- **BREAKING:** Makes the `wallets` property private ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
+    - Consumers should not use this property as it is intended for internal use only.
+- **BREAKING:** Makes `getPrivateKeyFor` a private method ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
+    - Consumers who wish to get the private key for a given account should use the `exportAccount` method.
+
+### Removed
+- **BREAKING:** Remove redundant `newGethSignMessage` method ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
+   - Consumers can use `signPersonalMessage` method as a replacement for newGethSignMessage.
+- **BREAKING:** `HDKeyring` no longer extends `EventEmitter`, so no `EventEmitter` methods are available on this class ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
 
 ## [4.0.2]
 ### Added
