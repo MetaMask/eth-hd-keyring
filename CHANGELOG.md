@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.1]
+### Removed
+- Remove prepack script and references in order to fix publish release flow ([#77](https://github.com/MetaMask/eth-hd-keyring/pull/77))
+
 ## [5.0.0]
 ### Changed
 - **BREAKING**: Update minimum Node.js version from v12 to v14 ([#67](https://github.com/MetaMask/eth-hd-keyring/pull/67))
@@ -50,7 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Deserialize method (and `HdKeyring` constructor by extension) can no longer be passed an options object containing a value for `numberOfAccounts` if it is not also containing a value for `mnemonic`.
 - Package name changed from `eth-hd-keyring` to `@metamask/eth-hd-keyring`.
 
-[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.0...HEAD
+[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.1...HEAD
+[5.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.2...v5.0.0
 [4.0.2]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.0...v4.0.1
