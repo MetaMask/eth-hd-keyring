@@ -9,15 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.0.0]
 ### Changed
 - **BREAKING**: Update minimum Node.js version from v12 to v14 ([#67](https://github.com/MetaMask/eth-hd-keyring/pull/67))
-- **BREAKING:** Makes version-specific `signTypedData` methods private ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
+- **BREAKING:** Makes version-specific `signTypedData` methods private ([#71](https://github.com/MetaMask/eth-hd-keyring/pull/71))
     - Consumers should use the generic `signTypedData` method and pass the version they'd like as a property in the options argument.
-- **BREAKING:** Makes the `wallets` property private ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
+- **BREAKING:** Makes the `wallets` property private ([#71](https://github.com/MetaMask/eth-hd-keyring/pull/71))
     - Consumers should not use this property as it is intended for internal use only.
-- **BREAKING:** Makes `getPrivateKeyFor` a private method ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
+- **BREAKING:** Makes `getPrivateKeyFor` a private method ([#71](https://github.com/MetaMask/eth-hd-keyring/pull/71))
     - Consumers who wish to get the private key for a given account should use the `exportAccount` method.
 
 ### Removed
-- **BREAKING:** Remove redundant `newGethSignMessage` method ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
+- **BREAKING:** Remove redundant `newGethSignMessage` method ([#71](https://github.com/MetaMask/eth-hd-keyring/pull/70))
    - Consumers can use `signPersonalMessage` method as a replacement for newGethSignMessage.
 - **BREAKING:** `HDKeyring` no longer extends `EventEmitter`, so no `EventEmitter` methods are available on this class ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
 
