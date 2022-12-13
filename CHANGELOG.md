@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Consumers should not use this property as it is intended for internal use only.
 - **BREAKING:** Makes `getPrivateKeyFor` a private method ([#71](https://github.com/MetaMask/eth-hd-keyring/pull/71))
     - Consumers who wish to get the private key for a given account should use the `exportAccount` method.
+- **BREAKING:** Bumps browser requirements to those with ES2020 support or greater ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
+    - This change is introduced in update of `@metamask/eth-sig-util` to v5 and new direct dependency on `ethereumjs/util` v8.0.2
+- Replaces use of `ethereumjs-wallet` implementation of hdkey with one from `ethereum-cryptography` and adapts accordingly.  ([#69](https://github.com/MetaMask/eth-hd-keyring/pull/69))
 
 ### Removed
 - **BREAKING:** Remove redundant `newGethSignMessage` method ([#71](https://github.com/MetaMask/eth-hd-keyring/pull/70))
