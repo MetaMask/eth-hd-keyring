@@ -18,11 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING:** Bumps browser requirements to those with ES2020 support or greater ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
     - This change is introduced in update of `@metamask/eth-sig-util` to v5 and new direct dependency on `ethereumjs/util` v8.0.2
 - Replaces use of `ethereumjs-wallet` implementation of hdkey with one from `ethereum-cryptography` and adapts accordingly.  ([#69](https://github.com/MetaMask/eth-hd-keyring/pull/69))
-
+- Replaces `@metamask/bip39` with `@metamask/scure-bip39` ([#67](https://github.com/MetaMask/eth-hd-keyring/pull/67))
 ### Removed
-- **BREAKING:** Remove redundant `newGethSignMessage` method ([#71](https://github.com/MetaMask/eth-hd-keyring/pull/70))
+- **BREAKING:** Remove redundant `newGethSignMessage` method ([#71](https://github.com/MetaMask/eth-hd-keyring/pull/71))
    - Consumers can use `signPersonalMessage` method as a replacement for newGethSignMessage.
 - **BREAKING:** `HDKeyring` no longer extends `EventEmitter`, so no `EventEmitter` methods are available on this class ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
+- Removes `ethereumjs-util` dependency. ([#67](https://github.com/MetaMask/eth-hd-keyring/pull/67))
 
 ## [4.0.2]
 ### Added
