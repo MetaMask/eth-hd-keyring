@@ -33,8 +33,6 @@ jobs:
       - name: Dry Run Publish
         # omit npm-token token to perform dry run publish
         uses: MetaMask/action-npm-publish@v2
-        env:
-          SKIP_PREPACK: true
 
   publish-npm:
     environment: npm-publish
@@ -50,5 +48,3 @@ jobs:
           # This `NPM_TOKEN` needs to be manually set per-repository.
           # Look in the repository settings under "Environments", and set this token in the `npm-publish` environment.
           npm-token: ${{ secrets.NPM_TOKEN }}
-        env:
-          SKIP_PREPACK: true
