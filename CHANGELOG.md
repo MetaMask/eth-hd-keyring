@@ -6,6 +6,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.0]
+### Changed
+- **BREAKING**: Update minimum Node.js version from v12 to v14 ([#67](https://github.com/MetaMask/eth-hd-keyring/pull/67))
+- **BREAKING:** Makes version-specific `signTypedData` methods private ([#71](https://github.com/MetaMask/eth-hd-keyring/pull/71))
+    - Consumers should use the generic `signTypedData` method and pass the version they'd like as a property in the options argument.
+- **BREAKING:** Makes the `wallets` property private ([#71](https://github.com/MetaMask/eth-hd-keyring/pull/71))
+    - Consumers should not use this property as it is intended for internal use only.
+- **BREAKING:** Makes `getPrivateKeyFor` a private method ([#71](https://github.com/MetaMask/eth-hd-keyring/pull/71))
+    - Consumers who wish to get the private key for a given account should use the `exportAccount` method.
+- **BREAKING:** Bumps browser requirements to those with ES2020 support or greater ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
+    - This change is introduced in update of `@metamask/eth-sig-util` to v5 and new direct dependency on `ethereumjs/util` v8.0.2
+- Replaces use of `ethereumjs-wallet` implementation of hdkey with one from `ethereum-cryptography` and adapts accordingly.  ([#69](https://github.com/MetaMask/eth-hd-keyring/pull/69))
+- Replaces `@metamask/bip39` with `@metamask/scure-bip39` ([#67](https://github.com/MetaMask/eth-hd-keyring/pull/67))
+
+### Removed
+- **BREAKING:** Remove redundant `newGethSignMessage` method ([#71](https://github.com/MetaMask/eth-hd-keyring/pull/71))
+   - Consumers can use `signPersonalMessage` method as a replacement for newGethSignMessage.
+- **BREAKING:** `HDKeyring` no longer extends `EventEmitter`, so no `EventEmitter` methods are available on this class ([#70](https://github.com/MetaMask/eth-hd-keyring/pull/70))
+- Removes `ethereumjs-util` dependency. ([#67](https://github.com/MetaMask/eth-hd-keyring/pull/67))
+
 ## [4.0.2]
 ### Added
 - Add parameter validation for constructor / `deserialize` method ([#65](https://github.com/MetaMask/eth-hd-keyring/pull/65))
@@ -30,7 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Deserialize method (and `HdKeyring` constructor by extension) can no longer be passed an options object containing a value for `numberOfAccounts` if it is not also containing a value for `mnemonic`.
 - Package name changed from `eth-hd-keyring` to `@metamask/eth-hd-keyring`.
 
-[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.2...HEAD
+[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.0...HEAD
+[5.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.2...v5.0.0
 [4.0.2]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/MetaMask/eth-hd-keyring/releases/tag/v4.0.0

@@ -1,6 +1,6 @@
 {
   "name": "@metamask/eth-hd-keyring",
-  "version": "4.0.2",
+  "version": "5.0.0",
   "description": "A simple standard interface for a seed phrase generated set of Ethereum accounts.",
   "keywords": [
     "ethereum",
