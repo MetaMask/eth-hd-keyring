@@ -37,19 +37,19 @@ class HdKeyring {
     this._initFromMnemonic(bip39.generateMnemonic(wordlist));
   }
 
-  uint8ArrayToString(mnemonic) {
+  _uint8ArrayToString(mnemonic) {
     const recoveredIndices = Array.from(
       new Uint16Array(new Uint8Array(mnemonic).buffer),
     );
     return recoveredIndices.map((i) => wordlist[i]).join(' ');
   }
 
-  stringToUint8Array(mnemonic) {
+  _stringToUint8Array(mnemonic) {
     const indices = mnemonic.split(' ').map((word) => wordlist.indexOf(word));
     return new Uint8Array(new Uint16Array(indices).buffer);
   }
 
-  mnemonicToUint8Array(mnemonic) {
+  _mnemonicToUint8Array(mnemonic) {
     let mnemonicData = mnemonic;
     // when encrypted/decrypted, buffers get cast into js object with a property type set to buffer
     if (mnemonic && mnemonic.type && mnemonic.type === 'Buffer') {
@@ -68,7 +68,7 @@ class HdKeyring {
       } else if (Buffer.isBuffer(mnemonicData)) {
         mnemonicAsString = mnemonicData.toString();
       }
-      return this.stringToUint8Array(mnemonicAsString);
+      return this._stringToUint8Array(mnemonicAsString);
     } else if (
       mnemonicData instanceof Object &&
       !(mnemonicData instanceof Uint8Array)
@@ -81,7 +81,7 @@ class HdKeyring {
 
   serialize() {
     return Promise.resolve({
-      mnemonic: this.mnemonicToUint8Array(this.mnemonic),
+      mnemonic: this._mnemonicToUint8Array(this.mnemonic),
       numberOfAccounts: this._wallets.length,
       hdPath: this.hdPath,
     });
@@ -278,7 +278,7 @@ class HdKeyring {
       );
     }
 
-    this.mnemonic = this.mnemonicToUint8Array(mnemonic);
+    this.mnemonic = this._mnemonicToUint8Array(mnemonic);
 
     // validate before initializing
     const isValid = bip39.validateMnemonic(this.mnemonic, wordlist);
