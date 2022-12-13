@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [5.0.1]
-### Uncategorized
-- remove prepack script and references ([#77](https://github.com/MetaMask/eth-hd-keyring/pull/77))
+### Removed
+- Remove prepack script and references in order to fix publish release flow ([#77](https://github.com/MetaMask/eth-hd-keyring/pull/77))
 
 ## [5.0.0]
 ### Changed
