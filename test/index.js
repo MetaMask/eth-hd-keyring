@@ -199,21 +199,24 @@ describe('hd-keyring', () => {
     });
 
     it('serializes mnemonic passed in as a string to an array of utf8 encoded bytes', async () => {
+      // keyring is instantiated with `sampleMnemonic` which is passed in as a string in the `beforeEach` block
       const output = await keyring.serialize();
-      expect(Buffer.from(output.mnemonic).toString()).toStrictEqual(
-        sampleMnemonic,
-      );
+      // this Buffer.from(...).toString() is the method of converting from an array of utf8 encoded bytes back to a string
+      const mnemonicAsString = Buffer.from(output.mnemonic).toString();
+      expect(mnemonicAsString).toStrictEqual(sampleMnemonic);
     });
 
     it('serializes mnemonic passed in as a an array of utf8 encoded bytes in the same format', async () => {
       const uint8Array = new TextEncoder('utf-8').encode(sampleMnemonic);
-      const mnemonicAsArryOfBytes = Array.from(uint8Array);
+      const mnemonicAsArrayOfUtf8EncodedBytes = Array.from(uint8Array);
       keyring = new HdKeyring({
-        mnemonic: mnemonicAsArryOfBytes,
+        mnemonic: mnemonicAsArrayOfUtf8EncodedBytes,
       });
 
       const output = await keyring.serialize();
-      expect(Buffer.from(output.mnemonic).toString()).toStrictEqual(
+      // this Buffer.from(...).toString() is the method of converting from an array of utf8 encoded bytes back to a string
+      const mnemonicAsString = Buffer.from(output.mnemonic).toString();
+      expect(mnemonicAsString).toStrictEqual(
         sampleMnemonic,
       );
     });
