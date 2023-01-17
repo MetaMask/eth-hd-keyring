@@ -80,8 +80,13 @@ class HdKeyring {
   }
 
   serialize() {
+    const mnemonicAsString = this._uint8ArrayToString(this.mnemonic);
+    const uint8ArrayMnemonic = new TextEncoder('utf-8').encode(
+      mnemonicAsString,
+    );
+
     return Promise.resolve({
-      mnemonic: this._mnemonicToUint8Array(this.mnemonic),
+      mnemonic: Array.from(uint8ArrayMnemonic),
       numberOfAccounts: this._wallets.length,
       hdPath: this.hdPath,
     });

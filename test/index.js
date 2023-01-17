@@ -182,33 +182,39 @@ describe('hd-keyring', () => {
   });
 
   describe('#serialize mnemonic.', () => {
-    it('serializes mnemonic stored as a buffer to a Uint8Array', async () => {
-      keyring.mnemonic = oldMMForkBIP39.generateMnemonic();
-      const mnemonicAsUint8Array = keyring._stringToUint8Array(
-        keyring.mnemonic.toString(),
+    beforeEach(() => {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+      });
+    });
+
+    it('serializes the mnemonic in the same format as previous version (an array of utf8 encoded bytes)', async () => {
+      // uses previous version of eth-hd-keyring to ensure backwards compatibility
+      const oldHDKeyring = new OldHdKeyring({ mnemonic: sampleMnemonic });
+      const { mnemonic: oldKeyringSerializedMnemonic } =
+        await oldHDKeyring.serialize();
+
+      const output = await keyring.serialize();
+      expect(output.mnemonic).toStrictEqual(oldKeyringSerializedMnemonic);
+    });
+
+    it('serializes mnemonic passed in as a string to an array of utf8 encoded bytes', async () => {
+      const output = await keyring.serialize();
+      expect(Buffer.from(output.mnemonic).toString()).toStrictEqual(
+        sampleMnemonic,
       );
-      const output = await keyring.serialize();
-      expect(output.numberOfAccounts).toBe(0);
-      expect(output.mnemonic).toStrictEqual(mnemonicAsUint8Array);
     });
 
-    it('serializes keyring data with mnemonic stored as a Uint8Array', async () => {
-      keyring.generateRandomMnemonic();
-      const { mnemonic } = keyring;
-      const hdpath = keyring.hdPath;
-      keyring.addAccounts(1);
-      const output = await keyring.serialize();
-      expect(output.numberOfAccounts).toBe(1);
-      expect(output.hdPath).toStrictEqual(hdpath);
-      expect(output.mnemonic).toStrictEqual(mnemonic);
-    });
+    it('serializes mnemonic passed in as a an array of utf8 encoded bytes in the same format', async () => {
+      const uint8Array = new TextEncoder('utf-8').encode(sampleMnemonic);
+      const mnemonicAsArryOfBytes = Array.from(uint8Array);
+      keyring = new HdKeyring({
+        mnemonic: mnemonicAsArryOfBytes,
+      });
 
-    it('serializes mnemonic stored as a string', async () => {
-      keyring.mnemonic = sampleMnemonic;
       const output = await keyring.serialize();
-      expect(output.numberOfAccounts).toBe(0);
-      expect(output.mnemonic).toStrictEqual(
-        keyring._stringToUint8Array(sampleMnemonic),
+      expect(Buffer.from(output.mnemonic).toString()).toStrictEqual(
+        sampleMnemonic,
       );
     });
   });
@@ -228,7 +234,7 @@ describe('hd-keyring', () => {
       expect(accountsSecondCheck[1]).toStrictEqual(secondAcct);
       expect(accountsSecondCheck).toHaveLength(2);
       const serialized = await keyring.serialize();
-      expect(keyring._uint8ArrayToString(serialized.mnemonic)).toStrictEqual(
+      expect(Buffer.from(serialized.mnemonic).toString()).toStrictEqual(
         sampleMnemonic,
       );
     });
