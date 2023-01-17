@@ -216,9 +216,7 @@ describe('hd-keyring', () => {
       const output = await keyring.serialize();
       // this Buffer.from(...).toString() is the method of converting from an array of utf8 encoded bytes back to a string
       const mnemonicAsString = Buffer.from(output.mnemonic).toString();
-      expect(mnemonicAsString).toStrictEqual(
-        sampleMnemonic,
-      );
+      expect(mnemonicAsString).toStrictEqual(sampleMnemonic);
     });
   });
 
