@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [6.0.0]
 ### Changed
 - Revert mnemonic serialization format from `Record<number, number>` (i.e. a stringified `Uint8Array`) which was introduced in v5.0.0 back to an untyped array of utf8 encoded bytes, which was the format prior to v5.0.0 ([#81](https://github.com/MetaMask/eth-hd-keyring/pull/81))
+
 ## [5.0.1] [DEPRECATED]
 ### Removed
 - Remove prepack script and references in order to fix publish release flow ([#77](https://github.com/MetaMask/eth-hd-keyring/pull/77))
