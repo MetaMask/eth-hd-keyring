@@ -182,13 +182,10 @@ describe('hd-keyring', () => {
   });
 
   describe('#serialize mnemonic.', () => {
-    beforeEach(() => {
+    it('serializes the mnemonic in the same format as previous version (an array of utf8 encoded bytes)', async () => {
       keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
       });
-    });
-
-    it('serializes the mnemonic in the same format as previous version (an array of utf8 encoded bytes)', async () => {
       // uses previous version of eth-hd-keyring to ensure backwards compatibility
       const oldHDKeyring = new OldHdKeyring({ mnemonic: sampleMnemonic });
       const { mnemonic: oldKeyringSerializedMnemonic } =
@@ -199,6 +196,9 @@ describe('hd-keyring', () => {
     });
 
     it('serializes mnemonic passed in as a string to an array of utf8 encoded bytes', async () => {
+      keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+      });
       // keyring is instantiated with `sampleMnemonic` which is passed in as a string in the `beforeEach` block
       const output = await keyring.serialize();
       // this Buffer.from(...).toString() is the method of converting from an array of utf8 encoded bytes back to a string
