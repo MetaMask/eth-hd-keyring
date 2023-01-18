@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.0]
+### Uncategorized
+- Revert mnemonic serialization format ([#81](https://github.com/MetaMask/eth-hd-keyring/pull/81))
+- fix typo in build-lint-test workflow ([#80](https://github.com/MetaMask/eth-hd-keyring/pull/80))
+- Bump json5 from 1.0.1 to 1.0.2 ([#79](https://github.com/MetaMask/eth-hd-keyring/pull/79))
+
 ## [5.0.1]
 ### Removed
 - Remove prepack script and references in order to fix publish release flow ([#77](https://github.com/MetaMask/eth-hd-keyring/pull/77))
@@ -54,7 +60,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Deserialize method (and `HdKeyring` constructor by extension) can no longer be passed an options object containing a value for `numberOfAccounts` if it is not also containing a value for `mnemonic`.
 - Package name changed from `eth-hd-keyring` to `@metamask/eth-hd-keyring`.
 
-[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.1...HEAD
+[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.0...HEAD
+[6.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.1...v6.0.0
 [5.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.2...v5.0.0
 [4.0.2]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.1...v4.0.2
