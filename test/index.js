@@ -37,11 +37,6 @@ const secondAcct = '0x1b00aed43a693f3a957f9feb5cc08afa031e37a0';
 const notKeyringAddress = '0xbD20F6F5F1616947a39E11926E78ec94817B3931';
 
 describe('hd-keyring', () => {
-  let keyring;
-  beforeEach(() => {
-    keyring = new HdKeyring();
-  });
-
   describe('compare old bip39 implementation with new', () => {
     it('should derive the same accounts from the same mnemonics', async () => {
       const mnemonics = [];
@@ -70,7 +65,7 @@ describe('hd-keyring', () => {
 
   describe('constructor', () => {
     it('constructs with a typeof string mnemonic', async () => {
-      keyring = new HdKeyring({
+      const keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 2,
       });
@@ -81,7 +76,7 @@ describe('hd-keyring', () => {
     });
 
     it('constructs with a typeof buffer mnemonic', async () => {
-      keyring = new HdKeyring({
+      const keyring = new HdKeyring({
         mnemonic: Buffer.from(sampleMnemonic, 'utf8'),
         numberOfAccounts: 2,
       });
@@ -98,7 +93,7 @@ describe('hd-keyring', () => {
       const uInt8ArrayOfMnemonic = new Uint8Array(
         new Uint16Array(indices).buffer,
       );
-      keyring = new HdKeyring({
+      const keyring = new HdKeyring({
         mnemonic: uInt8ArrayOfMnemonic,
         numberOfAccounts: 2,
       });
@@ -134,6 +129,7 @@ describe('hd-keyring', () => {
     const alreadyProvidedError =
       'Eth-Hd-Keyring: Secret recovery phrase already provided';
     it('double generateRandomMnemonic', () => {
+      const keyring = new HdKeyring();
       keyring.generateRandomMnemonic();
       expect(() => {
         keyring.generateRandomMnemonic();
@@ -141,7 +137,7 @@ describe('hd-keyring', () => {
     });
 
     it('constructor + generateRandomMnemonic', () => {
-      keyring = new HdKeyring({
+      const keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 2,
       });
@@ -152,7 +148,7 @@ describe('hd-keyring', () => {
     });
 
     it('constructor + deserialize', () => {
-      keyring = new HdKeyring({
+      const keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 2,
       });
@@ -175,6 +171,8 @@ describe('hd-keyring', () => {
 
   describe('#type', () => {
     it('returns the correct value', () => {
+      const keyring = new HdKeyring();
+
       const { type } = keyring;
       const correct = HdKeyring.type;
       expect(type).toStrictEqual(correct);
@@ -182,13 +180,10 @@ describe('hd-keyring', () => {
   });
 
   describe('#serialize mnemonic.', () => {
-    beforeEach(() => {
-      keyring = new HdKeyring({
+    it('serializes the mnemonic in the same format as previous version (an array of utf8 encoded bytes)', async () => {
+      const keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
       });
-    });
-
-    it('serializes the mnemonic in the same format as previous version (an array of utf8 encoded bytes)', async () => {
       // uses previous version of eth-hd-keyring to ensure backwards compatibility
       const oldHDKeyring = new OldHdKeyring({ mnemonic: sampleMnemonic });
       const { mnemonic: oldKeyringSerializedMnemonic } =
@@ -199,7 +194,9 @@ describe('hd-keyring', () => {
     });
 
     it('serializes mnemonic passed in as a string to an array of utf8 encoded bytes', async () => {
-      // keyring is instantiated with `sampleMnemonic` which is passed in as a string in the `beforeEach` block
+      const keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+      });
       const output = await keyring.serialize();
       // this Buffer.from(...).toString() is the method of converting from an array of utf8 encoded bytes back to a string
       const mnemonicAsString = Buffer.from(output.mnemonic).toString();
@@ -209,7 +206,7 @@ describe('hd-keyring', () => {
     it('serializes mnemonic passed in as a an array of utf8 encoded bytes in the same format', async () => {
       const uint8Array = new TextEncoder('utf-8').encode(sampleMnemonic);
       const mnemonicAsArrayOfUtf8EncodedBytes = Array.from(uint8Array);
-      keyring = new HdKeyring({
+      const keyring = new HdKeyring({
         mnemonic: mnemonicAsArrayOfUtf8EncodedBytes,
       });
 
@@ -222,6 +219,7 @@ describe('hd-keyring', () => {
 
   describe('#deserialize a private key', () => {
     it('serializes what it deserializes', async () => {
+      const keyring = new HdKeyring();
       await keyring.deserialize({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 1,
@@ -244,6 +242,7 @@ describe('hd-keyring', () => {
   describe('#addAccounts', () => {
     describe('with no arguments', () => {
       it('creates a single wallet', async () => {
+        const keyring = new HdKeyring();
         keyring.generateRandomMnemonic();
         await keyring.addAccounts();
         const accounts = await keyring.getAccounts();
@@ -251,6 +250,7 @@ describe('hd-keyring', () => {
       });
 
       it('throws an error when no SRP has been generated yet', async () => {
+        const keyring = new HdKeyring();
         expect(() => keyring.addAccounts()).toThrow(
           'Eth-Hd-Keyring: No secret recovery phrase provided',
         );
@@ -259,6 +259,7 @@ describe('hd-keyring', () => {
 
     describe('with a numeric argument', () => {
       it('creates that number of wallets', async () => {
+        const keyring = new HdKeyring();
         keyring.generateRandomMnemonic();
         await keyring.addAccounts(3);
         const accounts = await keyring.getAccounts();
@@ -269,6 +270,8 @@ describe('hd-keyring', () => {
 
   describe('#signPersonalMessage', () => {
     it('returns the expected value', async () => {
+      const keyring = new HdKeyring();
+
       const address = firstAcct;
       const message = '0x68656c6c6f20776f726c64';
 
@@ -290,8 +293,8 @@ describe('hd-keyring', () => {
 
   describe('#signTypedData', () => {
     it('can recover a basic signature', async () => {
+      const keyring = new HdKeyring();
       Buffer.from(privKeyHex, 'hex');
-
       const typedData = [
         {
           type: 'string',
@@ -323,6 +326,7 @@ describe('hd-keyring', () => {
     ];
 
     it('signs in a compliant and recoverable way', async () => {
+      const keyring = new HdKeyring();
       keyring.generateRandomMnemonic();
       await keyring.addAccounts(1);
       const addresses = await keyring.getAccounts();
@@ -341,6 +345,7 @@ describe('hd-keyring', () => {
 
   describe('#signTypedData_v3', () => {
     it('signs in a compliant and recoverable way', async () => {
+      const keyring = new HdKeyring();
       const typedData = {
         types: {
           EIP712Domain: [],
@@ -370,6 +375,7 @@ describe('hd-keyring', () => {
 
   describe('#signTypedData_v3 signature verification', () => {
     it('signs in a recoverable way.', async () => {
+      const keyring = new HdKeyring();
       const typedData = {
         types: {
           EIP712Domain: [
@@ -426,6 +432,7 @@ describe('hd-keyring', () => {
 
   describe('custom hd paths', () => {
     it('can deserialize with an hdPath param and generate the same accounts.', async () => {
+      const keyring = new HdKeyring();
       const hdPathString = `m/44'/60'/0'/0`;
       keyring.deserialize({
         mnemonic: sampleMnemonic,
@@ -439,8 +446,8 @@ describe('hd-keyring', () => {
     });
 
     it('can deserialize with an hdPath param and generate different accounts.', async () => {
+      const keyring = new HdKeyring();
       const hdPathString = `m/44'/60'/0'/1`;
-
       keyring.deserialize({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 1,
@@ -461,14 +468,14 @@ describe('hd-keyring', () => {
 
       for (let i = 0; i < 1e3; i++) {
 
-        keyring = new HdKeyring({
+        const keyring = new HdKeyring({
           numberOfAccounts: 1,
         })
         const originalAccounts = await keyring.getAccounts()
         const serialized = await keyring.serialize()
         const mnemonic = serialized.mnemonic
 
-        keyring = new HdKeyring({
+        const keyring = new HdKeyring({
           numberOfAccounts: 1,
           mnemonic,
         })
@@ -488,6 +495,7 @@ describe('hd-keyring', () => {
 
   describe('signing methods withAppKeyOrigin option', () => {
     it('should signPersonalMessage with the expected key when passed a withAppKeyOrigin', async () => {
+      const keyring = new HdKeyring();
       const address = firstAcct;
       const message = '0x68656c6c6f20776f726c64';
 
@@ -509,6 +517,7 @@ describe('hd-keyring', () => {
     });
 
     it('should signTypedData with the expected key when passed a withAppKeyOrigin', async () => {
+      const keyring = new HdKeyring();
       const address = firstAcct;
       const typedData = {
         types: {
@@ -553,6 +562,7 @@ describe('hd-keyring', () => {
       '0xb21867b2221db0172e970b7370825b71c57823ff8714168ce9748f32f450e2c43d0fe396eb5b5f59284b7fd108c8cf61a6180a6756bdd3d4b7b9ccc4ac6d51611b';
 
     it('passes the dennis test', async function () {
+      const keyring = new HdKeyring();
       await keyring.deserialize({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 1,
@@ -562,6 +572,7 @@ describe('hd-keyring', () => {
     });
 
     it('reliably can decode messages it signs', async function () {
+      const keyring = new HdKeyring();
       await keyring.deserialize({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 1,
@@ -590,6 +601,7 @@ describe('hd-keyring', () => {
     });
 
     it('throw error for invalid message', async function () {
+      const keyring = new HdKeyring();
       await keyring.deserialize({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 1,
@@ -601,6 +613,7 @@ describe('hd-keyring', () => {
     });
 
     it('throw error if empty address is passed', async function () {
+      const keyring = new HdKeyring();
       await keyring.deserialize({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 1,
@@ -612,6 +625,7 @@ describe('hd-keyring', () => {
     });
 
     it('throw error if address not associated with the current keyring is passed', async function () {
+      const keyring = new HdKeyring();
       await keyring.deserialize({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 1,
@@ -624,6 +638,7 @@ describe('hd-keyring', () => {
   });
 
   describe('#removeAccount', function () {
+    let keyring;
     beforeEach(() => {
       keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
@@ -652,6 +667,7 @@ describe('hd-keyring', () => {
   });
 
   describe('getAppKeyAddress', function () {
+    let keyring;
     beforeEach(() => {
       keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
@@ -717,6 +733,7 @@ describe('hd-keyring', () => {
   });
 
   describe('exportAccount', function () {
+    let keyring;
     beforeEach(() => {
       keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
@@ -741,6 +758,7 @@ describe('hd-keyring', () => {
 
   describe('#encryptionPublicKey', function () {
     const publicKey = 'LV7lWhd0mUDcvxkMU2o6uKXftu25zq4bMYdmMqppXic=';
+    let keyring;
     beforeEach(() => {
       keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
@@ -769,6 +787,7 @@ describe('hd-keyring', () => {
   });
 
   describe('#signTypedData V4 signature verification', function () {
+    let keyring;
     beforeEach(() => {
       keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
@@ -849,7 +868,7 @@ describe('hd-keyring', () => {
 
   describe('#decryptMessage', function () {
     const message = 'Hello world!';
-    let encryptedMessage;
+    let encryptedMessage, keyring;
 
     beforeEach(async () => {
       keyring = new HdKeyring({
@@ -889,6 +908,7 @@ describe('hd-keyring', () => {
   });
 
   describe('#signTransaction', function () {
+    let keyring;
     beforeEach(() => {
       keyring = new HdKeyring({
         mnemonic: sampleMnemonic,
