@@ -7,16 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [6.0.0]
-### Uncategorized
-- Revert mnemonic serialization format ([#81](https://github.com/MetaMask/eth-hd-keyring/pull/81))
-- fix typo in build-lint-test workflow ([#80](https://github.com/MetaMask/eth-hd-keyring/pull/80))
-- Bump json5 from 1.0.1 to 1.0.2 ([#79](https://github.com/MetaMask/eth-hd-keyring/pull/79))
+### Changed
+- Revert mnemonic serialization format from a `Uint8Array` which was introduced in v5.0.0 back to an untyped array of utf8 encoded bytes, which was the format prior to v5.0.0 ([#81](https://github.com/MetaMask/eth-hd-keyring/pull/81))
 
-## [5.0.1]
+## [5.0.1] [DEPRECATED]
 ### Removed
 - Remove prepack script and references in order to fix publish release flow ([#77](https://github.com/MetaMask/eth-hd-keyring/pull/77))
 
-## [5.0.0]
+## [5.0.0] [DEPRECATED]
 ### Changed
 - **BREAKING**: Update minimum Node.js version from v12 to v14 ([#67](https://github.com/MetaMask/eth-hd-keyring/pull/67))
 - **BREAKING:** Makes version-specific `signTypedData` methods private ([#71](https://github.com/MetaMask/eth-hd-keyring/pull/71))
