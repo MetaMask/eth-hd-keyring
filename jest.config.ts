@@ -1,4 +1,6 @@
-module.exports = {
+import type { Config } from '@jest/types';
+
+const config: Config.InitialOptions = {
   collectCoverage: true,
   coverageReporters: ['text', 'html'],
   coverageThreshold: {
@@ -18,6 +20,11 @@ module.exports = {
   // modules.
   restoreMocks: true,
   testEnvironment: 'node',
-  testMatch: ['**/test/**/*.js'],
+  testMatch: ['**/test/**/*.ts', '**/test/**/*.js'],
   testTimeout: 2500,
+  transform: {
+    '^.+\\.tsx?$': 'ts-jest',
+  },
 };
+
+export default config;
