@@ -77,7 +77,7 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
     this.#initFromMnemonic(bip39.generateMnemonic(wordlist));
   }
 
-  private uint8ArrayToString(mnemonic: Uint8Array): string {
+  #uint8ArrayToString(mnemonic: Uint8Array): string {
     const recoveredIndices = Array.from(
       new Uint16Array(new Uint8Array(mnemonic).buffer),
     );
@@ -134,7 +134,7 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
     if (!this.mnemonic)
       throw new Error('Eth-Hd-Keyring: Missing mnemonic when serializing');
 
-    const mnemonicAsString = this.uint8ArrayToString(this.mnemonic);
+    const mnemonicAsString = this.#uint8ArrayToString(this.mnemonic);
     const uint8ArrayMnemonic = new TextEncoder().encode(mnemonicAsString);
 
     return Promise.resolve({
