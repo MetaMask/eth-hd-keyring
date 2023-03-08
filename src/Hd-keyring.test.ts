@@ -125,11 +125,12 @@ describe('hd-keyring', () => {
     });
 
     it('throws when numberOfAccounts is passed with no mnemonic', async () => {
-      await expect(async () => {
-        const keyring = new HdKeyring({
+      expect(() => {
+        // we are forcing a failure
+        // eslint-disable-next-line
+        new HdKeyring({
           numberOfAccounts: 1,
         });
-        await keyring.getAccounts();
       }).toThrow(
         'Eth-Hd-Keyring: Deserialize method cannot be called with an opts value for numberOfAccounts and no menmonic',
       );
