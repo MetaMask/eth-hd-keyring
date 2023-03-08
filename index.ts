@@ -25,12 +25,7 @@ import {
   TypedDataV1,
   TypedMessage,
 } from '@metamask/eth-sig-util';
-import {
-  Hex,
-  Keyring,
-  Eip1024EncryptedData,
-  assertIsStrictHexString,
-} from '@metamask/utils';
+import { Hex, Keyring, Eip1024EncryptedData } from '@metamask/utils';
 import { TxData, TypedTransaction } from '@ethereumjs/tx';
 
 interface KeyringOpt {
@@ -210,11 +205,10 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
     const wallet = this.#getWalletForAccount(address, {
       withAppKeyOrigin: origin,
     });
+    // normalize will prefix the address with 0x
     const appKeyAddress = normalize(
       publicToAddress(Buffer.from(wallet.publicKey!)).toString('hex'),
-    );
-
-    assertIsStrictHexString(appKeyAddress);
+    ) as Hex;
 
     return appKeyAddress;
   }
@@ -307,7 +301,6 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
 
   removeAccount(account: Hex): void {
     const address = account;
-    assertIsStrictHexString(address);
     if (
       !this.wallets
         .map(({ publicKey }) => this.#addressfromPublicKey(publicKey!))
@@ -401,11 +394,10 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
 
   // small helper function to convert publicKey in Uint8Array form to a publicAddress as a hex
   #addressfromPublicKey(publicKey: Uint8Array): Hex {
+    // bufferToHex adds a 0x prefix
     const address = bufferToHex(
       publicToAddress(Buffer.from(publicKey), true),
-    ).toLowerCase();
-
-    assertIsStrictHexString(address);
+    ).toLowerCase() as Hex;
 
     return address;
   }
