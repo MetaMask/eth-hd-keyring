@@ -26,23 +26,24 @@
     "test": "jest"
   },
   "dependencies": {
+    "@ethereumjs/tx": "^4.1.1",
     "@ethereumjs/util": "^8.0.2",
+    "@metamask/bip39": "^4.0.0",
     "@metamask/eth-sig-util": "^5.0.2",
     "@metamask/scure-bip39": "^2.0.3",
     "@metamask/utils": "^5.0.0",
     "ethereum-cryptography": "^1.1.2"
   },
   "devDependencies": {
-    "@ethereumjs/tx": "^4.1.1",
     "@lavamoat/allow-scripts": "^2.1.0",
     "@metamask/auto-changelog": "^2.5.0",
-    "@metamask/bip39": "^4.0.0",
     "@metamask/eslint-config": "^8.0.0",
     "@metamask/eslint-config-jest": "^9.0.0",
     "@metamask/eslint-config-nodejs": "^8.0.0",
     "@metamask/eth-hd-keyring": "4.0.1",
     "@types/jest": "^29.4.0",
     "@types/node": "^18.14.6",
+    "@typescript-eslint/parser": "^5.54.1",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.24.2",

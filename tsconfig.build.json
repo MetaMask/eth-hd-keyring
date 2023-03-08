@@ -6,5 +6,5 @@
     "noEmit": false,
     "outDir": "dist",
     "sourceMap": true
-  },
+  }
 }

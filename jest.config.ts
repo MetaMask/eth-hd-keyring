@@ -20,7 +20,7 @@ const config: Config.InitialOptions = {
   // modules.
   restoreMocks: true,
   testEnvironment: 'node',
-  testMatch: ['**/test/**/*.ts', '**/test/**/*.js'],
+  testMatch: ['./**/*.test.ts'],
   testTimeout: 2500,
   transform: {
     '^.+\\.tsx?$': 'ts-jest',

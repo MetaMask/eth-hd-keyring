@@ -7,7 +7,6 @@ import {
   SignTypedDataVersion,
   encrypt,
   EthEncryptedData,
-  TypedDataV1,
 } from '@metamask/eth-sig-util';
 import { wordlist } from '@metamask/scure-bip39/dist/wordlists/english';
 import { generateMnemonic as oldMMForkBIP39GenerateMnemonic } from '@metamask/bip39';
@@ -19,11 +18,11 @@ import {
   pubToAddress,
 } from '@ethereumjs/util';
 import { TransactionFactory, Transaction as EthereumTx } from '@ethereumjs/tx';
+import { keccak256 } from 'ethereum-cryptography/keccak';
+import { Eip1024EncryptedData, Hex } from '@metamask/utils';
+import HdKeyring from './Hd-keyring';
 
 const OldHdKeyring = require('@metamask/eth-hd-keyring');
-import { keccak256 } from 'ethereum-cryptography/keccak';
-import HdKeyring from '..';
-import { Eip1024EncryptedData, Hex, Transaction } from '@metamask/utils';
 
 // Sample account:
 const privKeyHex =
@@ -125,11 +124,12 @@ describe('hd-keyring', () => {
       ).toThrow('Eth-Hd-Keyring: Invalid secret recovery phrase provided');
     });
 
-    it('throws when numberOfAccounts is passed with no mnemonic', () => {
-      expect(() => {
-        new HdKeyring({
+    it('throws when numberOfAccounts is passed with no mnemonic', async () => {
+      await expect(async () => {
+        const keyring = new HdKeyring({
           numberOfAccounts: 1,
         });
+        await keyring.getAccounts();
       }).toThrow(
         'Eth-Hd-Keyring: Deserialize method cannot be called with an opts value for numberOfAccounts and no menmonic',
       );

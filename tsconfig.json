@@ -13,6 +13,12 @@
     "target": "ES2017",
     "noImplicitAny": false
   },
-  "include": ["./index.ts"],
-  "exclude": ["./test", "dist", "node_modules","jest.config.ts"]
+  "include": ["src/*.ts"],
+  "exclude": [
+    "./src/*.test.ts",
+    "./test/**/*",
+    "dist",
+    "node_modules",
+    "jest.config.ts"
+  ]
 }

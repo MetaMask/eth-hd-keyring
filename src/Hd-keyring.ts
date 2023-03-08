@@ -10,14 +10,12 @@ import {
   bufferToHex,
   ECDSASignature,
 } from '@ethereumjs/util';
-const bip39 = require('@metamask/scure-bip39');
 
 import { wordlist } from '@metamask/scure-bip39/dist/wordlists/english';
 import {
   concatSig,
   decrypt,
   getEncryptionPublicKey,
-  MessageTypes,
   normalize,
   personalSign,
   signTypedData,
@@ -28,6 +26,12 @@ import {
 import { Hex, Keyring, Eip1024EncryptedData } from '@metamask/utils';
 import { TxData, TypedTransaction } from '@ethereumjs/tx';
 
+const bip39 = require('@metamask/scure-bip39');
+
+type JsCastedBuffer = {
+  type: string;
+  data: any;
+};
 interface KeyringOpt {
   mnemonic?: Buffer | JsCastedBuffer | string | Uint8Array | Array<number>;
   numberOfAccounts?: number;
@@ -42,23 +46,25 @@ type SerializedHdKeyringState = {
   hdPath: string;
 };
 
-type JsCastedBuffer = {
-  type: string;
-  data: any;
-};
-
 // Options:
 const hdPathString = `m/44'/60'/0'/0`;
 const type = 'HD Key Tree';
 
 export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
   static type: string = type;
+
   type: string;
+
   private wallets: HDKey[] = [];
+
   root: HDKey | undefined | null;
+
   mnemonic: Uint8Array | undefined | null;
+
   hdWallet: HDKey | undefined | null;
+
   hdPath: string | undefined | null;
+
   opts: KeyringOpt | undefined | null;
 
   /* PUBLIC METHODS */
@@ -126,8 +132,9 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
   }
 
   serialize(): Promise<SerializedHdKeyringState> {
-    if (!this.mnemonic)
+    if (!this.mnemonic) {
       throw new Error('Eth-Hd-Keyring: Missing mnemonic when serializing');
+    }
 
     const mnemonicAsString = this.#uint8ArrayToString(this.mnemonic);
     const uint8ArrayMnemonic = new TextEncoder().encode(mnemonicAsString);
@@ -183,7 +190,7 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
     }
 
     const hexWallets: Hex[] = newWallets.map((w) => {
-      //HDKey's method publicKey can return null
+      // HDKey's method publicKey can return null
       return this.#addressfromPublicKey(w.publicKey!);
     });
     return Promise.resolve(hexWallets);

@@ -1,11 +1,11 @@
 module.exports = {
   root: true,
-
+  parser: '@typescript-eslint/parser',
   extends: ['@metamask/eslint-config', '@metamask/eslint-config-nodejs'],
 
   overrides: [
     {
-      files: ['test/**/*.js'],
+      files: ['**/*.test.ts'],
       extends: ['@metamask/eslint-config-jest'],
       rules: {
         'node/no-unpublished-require': 0,
@@ -13,5 +13,21 @@ module.exports = {
     },
   ],
 
-  ignorePatterns: ['!.eslintrc.js', '!.prettierrc.js'],
+  settings: {
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      },
+    },
+    node: {
+      tryExtensions: ['.js', '.json', '.node', '.ts'],
+    },
+  },
+
+  ignorePatterns: [
+    '!.eslintrc.js',
+    '!.prettierrc.js',
+    'dist/**/*',
+    'jest.config.ts',
+  ],
 };
