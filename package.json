@@ -18,7 +18,7 @@
   "author": "Dan Finlay",
   "main": "index.js",
   "scripts": {
-    "build": "tsc tsconfig.json",
+    "build": "tsc --project tsconfig.build.json",
     "lint": "yarn lint:eslint && yarn lint:misc --check",
     "lint:eslint": "eslint . --cache --ext js,ts",
     "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
@@ -29,13 +29,11 @@
     "@ethereumjs/util": "^8.0.2",
     "@metamask/eth-sig-util": "^5.0.2",
     "@metamask/scure-bip39": "^2.0.3",
-    "@metamask/utils": "^4.0.0",
-    "add": "^2.0.6",
-    "ethereum-cryptography": "^1.1.2",
-    "yarn": "^1.22.19"
+    "@metamask/utils": "^5.0.0",
+    "ethereum-cryptography": "^1.1.2"
   },
   "devDependencies": {
-    "@ethereumjs/tx": "^4.0.1",
+    "@ethereumjs/tx": "^4.1.1",
     "@lavamoat/allow-scripts": "^2.1.0",
     "@metamask/auto-changelog": "^2.5.0",
     "@metamask/bip39": "^4.0.0",
@@ -44,6 +42,7 @@
     "@metamask/eslint-config-nodejs": "^8.0.0",
     "@metamask/eth-hd-keyring": "4.0.1",
     "@types/jest": "^29.4.0",
+    "@types/node": "^18.14.6",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.24.2",
@@ -55,6 +54,7 @@
     "prettier-plugin-packagejson": "^2.2.12",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
+    "typedoc": "^0.23.26",
     "typescript": "^4.9.5"
   },
   "packageManager": "yarn@3.3.0",
