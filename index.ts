@@ -8,6 +8,7 @@ import {
   ecsign,
   arrToBufArr,
   bufferToHex,
+  ECDSASignature,
 } from '@ethereumjs/util';
 const bip39 = require('@metamask/scure-bip39');
 
@@ -24,24 +25,41 @@ import {
   TypedDataV1,
   TypedMessage,
 } from '@metamask/eth-sig-util';
-import { Transaction, TypedTransaction } from '@ethereumjs/tx';
+import {
+  Hex,
+  Keyring,
+  Eip1024EncryptedData,
+  assertIsStrictHexString,
+} from '@metamask/utils';
+import { TxData, TypedTransaction } from '@ethereumjs/tx';
 
 interface KeyringOpt {
+  mnemonic?: Buffer | JsCastedBuffer | string | Uint8Array | Array<number>;
   numberOfAccounts?: number;
-  mnemonic?: Uint8Array | Buffer | string | number[];
   hdPath?: string;
   withAppKeyOrigin?: string;
   version?: SignTypedDataVersion;
 }
 
+type SerializedHdKeyringState = {
+  mnemonic: number[];
+  numberOfAccounts: number;
+  hdPath: string;
+};
+
+type JsCastedBuffer = {
+  type: string;
+  data: any;
+};
+
 // Options:
 const hdPathString = `m/44'/60'/0'/0`;
 const type = 'HD Key Tree';
 
-export default class HdKeyring {
+export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
   static type: string = type;
   type: string;
-  _wallets: HDKey[] = [];
+  private wallets: HDKey[] = [];
   root: HDKey | undefined | null;
   mnemonic: Uint8Array | undefined | null;
   hdWallet: HDKey | undefined | null;
@@ -51,12 +69,12 @@ export default class HdKeyring {
   /* PUBLIC METHODS */
   constructor(opts: KeyringOpt = {}) {
     this.type = type;
-    this._wallets = [];
+    this.wallets = [];
     this.deserialize(opts);
   }
 
   generateRandomMnemonic() {
-    this.initFromMnemonic(bip39.generateMnemonic(wordlist));
+    this.#initFromMnemonic(bip39.generateMnemonic(wordlist));
   }
 
   private uint8ArrayToString(mnemonic: Uint8Array): string {
@@ -66,19 +84,24 @@ export default class HdKeyring {
     return recoveredIndices.map((i) => wordlist[i]).join(' ');
   }
 
-  private stringToUint8Array(mnemonic: string): Uint8Array {
+  #stringToUint8Array(mnemonic: string): Uint8Array {
     const indices = mnemonic.split(' ').map((word) => wordlist.indexOf(word));
     return new Uint8Array(new Uint16Array(indices).buffer);
   }
 
-  private mnemonicToUint8Array(
-    mnemonic: Buffer | string | Uint8Array | Array<number>,
+  #mnemonicToUint8Array(
+    mnemonic: Buffer | JsCastedBuffer | string | Uint8Array | Array<number>,
   ): Uint8Array {
     let mnemonicData = mnemonic;
     // when encrypted/decrypted, buffers get cast into js object with a property type set to buffer
-    // @ts-ignore
-    if (mnemonic && mnemonic.type && mnemonic.type === 'Buffer') {
-      // @ts-ignore
+    if (
+      mnemonic &&
+      typeof mnemonic !== 'string' &&
+      !ArrayBuffer.isView(mnemonic) &&
+      !Array.isArray(mnemonic) &&
+      !Buffer.isBuffer(mnemonic) &&
+      mnemonic.type === 'Buffer'
+    ) {
       mnemonicData = mnemonic.data;
     }
 
@@ -88,13 +111,15 @@ export default class HdKeyring {
       Buffer.isBuffer(mnemonicData) ||
       Array.isArray(mnemonicData)
     ) {
-      let mnemonicAsString = mnemonicData;
+      let mnemonicAsString;
       if (Array.isArray(mnemonicData)) {
         mnemonicAsString = Buffer.from(mnemonicData).toString();
       } else if (Buffer.isBuffer(mnemonicData)) {
         mnemonicAsString = mnemonicData.toString();
+      } else {
+        mnemonicAsString = mnemonicData;
       }
-      return this.stringToUint8Array(mnemonicAsString as string);
+      return this.#stringToUint8Array(mnemonicAsString);
     } else if (
       mnemonicData instanceof Object &&
       !(mnemonicData instanceof Uint8Array)
@@ -105,7 +130,7 @@ export default class HdKeyring {
     return mnemonicData;
   }
 
-  serialize() {
+  serialize(): Promise<SerializedHdKeyringState> {
     if (!this.mnemonic)
       throw new Error('Eth-Hd-Keyring: Missing mnemonic when serializing');
 
@@ -114,13 +139,14 @@ export default class HdKeyring {
 
     return Promise.resolve({
       mnemonic: Array.from(uint8ArrayMnemonic),
-      numberOfAccounts: this._wallets.length,
-      hdPath: this.hdPath,
+      numberOfAccounts: this.wallets.length,
+      hdPath: this.hdPath!,
     });
   }
 
-  deserialize(opts: KeyringOpt = {}): Promise<string[]> {
-    if (opts.numberOfAccounts && !opts.mnemonic) {
+  // @ts-ignore return type is void
+  deserialize(state: KeyringOpt = {}): Promise<string[]> {
+    if (state.numberOfAccounts && !state.mnemonic) {
       throw new Error(
         'Eth-Hd-Keyring: Deserialize method cannot be called with an opts value for numberOfAccounts and no menmonic',
       );
@@ -131,92 +157,100 @@ export default class HdKeyring {
         'Eth-Hd-Keyring: Secret recovery phrase already provided',
       );
     }
-    this.opts = opts;
-    this._wallets = [];
+    this.opts = state;
+    this.wallets = [];
     this.mnemonic = null;
     this.root = null;
-    this.hdPath = opts.hdPath || hdPathString;
+    this.hdPath = state.hdPath || hdPathString;
 
-    if (opts.mnemonic) {
-      this.initFromMnemonic(opts.mnemonic);
+    if (state.mnemonic) {
+      this.#initFromMnemonic(state.mnemonic);
     }
 
-    if (opts.numberOfAccounts) {
-      return this.addAccounts(opts.numberOfAccounts);
+    if (state.numberOfAccounts) {
+      return this.addAccounts(state.numberOfAccounts);
     }
 
     return Promise.resolve([]);
   }
 
-  addAccounts(numberOfAccounts = 1): Promise<string[]> {
+  addAccounts(numberOfAccounts = 1): Promise<Hex[]> {
     if (!this.root) {
       throw new Error('Eth-Hd-Keyring: No secret recovery phrase provided');
     }
 
-    const oldLen = this._wallets.length;
+    const oldLen = this.wallets.length;
     const newWallets: HDKey[] = [];
     for (let i = oldLen; i < numberOfAccounts + oldLen; i++) {
       const wallet = this.root.deriveChild(i);
       newWallets.push(wallet);
-      this._wallets.push(wallet);
+      this.wallets.push(wallet);
     }
 
-    const hexWallets: string[] = newWallets.map((w) => {
+    const hexWallets: Hex[] = newWallets.map((w) => {
       //HDKey's method publicKey can return null
-      return this.addressfromPublicKey(w.publicKey!);
+      return this.#addressfromPublicKey(w.publicKey!);
     });
     return Promise.resolve(hexWallets);
   }
 
-  getAccounts(): string[] {
-    return this._wallets.map((w) => this.addressfromPublicKey(w.publicKey!));
+  getAccounts(): Promise<Hex[]> {
+    return Promise.resolve(
+      this.wallets.map((w) => this.#addressfromPublicKey(w.publicKey!)),
+    );
   }
 
   /* BASE KEYRING METHODS */
 
   // returns an address specific to an app
-  async getAppKeyAddress(address: string, origin: string): Promise<string> {
+  async getAppKeyAddress(address: Hex, origin: string): Promise<Hex> {
     if (!origin || typeof origin !== 'string') {
       throw new Error(`'origin' must be a non-empty string`);
     }
-    const wallet = this.getWalletForAccount(address, {
+    const wallet = this.#getWalletForAccount(address, {
       withAppKeyOrigin: origin,
     });
     const appKeyAddress = normalize(
-      publicToAddress(wallet.publicKey! as Buffer).toString('hex'),
+      publicToAddress(Buffer.from(wallet.publicKey!)).toString('hex'),
     );
+
+    assertIsStrictHexString(appKeyAddress);
 
     return appKeyAddress;
   }
 
   // exportAccount should return a hex-encoded private key:
-  async exportAccount(address: string, opts: KeyringOpt = {}): Promise<string> {
-    const wallet = this.getWalletForAccount(address, opts);
+  async exportAccount(address: Hex, opts: KeyringOpt = {}): Promise<string> {
+    const wallet = this.#getWalletForAccount(address, opts);
     return bytesToHex(wallet.privateKey!);
   }
 
   // tx is an instance of the ethereumjs-transaction class.
   async signTransaction(
-    address: string,
-    tx: TypedTransaction,
-    opts: KeyringOpt = {},
-  ): Promise<TypedTransaction> {
-    const privKey = this.getPrivateKeyFor(address, opts);
-    const signedTx = tx.sign(privKey as Buffer);
+    address: Hex,
+    transaction: TypedTransaction,
+    options: KeyringOpt = {},
+  ): Promise<TxData> {
+    const privKey = this.#getPrivateKeyFor(address, options);
+    const signedTx = transaction.sign(Buffer.from(privKey));
+
     // Newer versions of Ethereumjs-tx are immutable and return a new tx object
-    return signedTx === undefined ? tx : signedTx;
+    return signedTx === undefined ? transaction : signedTx;
   }
 
   // For eth_sign, we need to sign arbitrary data:
   async signMessage(
-    address: string,
-    data: any,
+    address: Hex,
+    data: string,
     opts: KeyringOpt = {},
   ): Promise<string> {
-    const message = stripHexPrefix(data);
-    const privKey = this.getPrivateKeyFor(address, opts);
-    const msgSig = ecsign(Buffer.from(message, 'hex'), privKey as Buffer);
-    const rawMsgSig = concatSig(
+    const message: string = stripHexPrefix(data);
+    const privKey: Uint8Array = this.#getPrivateKeyFor(address, opts);
+    const msgSig: ECDSASignature = ecsign(
+      Buffer.from(message, 'hex'),
+      Buffer.from(privKey),
+    );
+    const rawMsgSig: string = concatSig(
       msgSig.v as unknown as Buffer,
       msgSig.r,
       msgSig.s,
@@ -226,22 +260,22 @@ export default class HdKeyring {
 
   // For personal_sign, we need to prefix the message:
   async signPersonalMessage(
-    address: string,
-    msgHex: string,
-    opts: KeyringOpt = {},
+    address: Hex,
+    message: Hex,
+    options: Record<string, unknown> = {},
   ): Promise<string> {
-    const privKey = this.getPrivateKeyFor(address, opts);
+    const privKey: Uint8Array = this.#getPrivateKeyFor(address, options);
     const privateKey = Buffer.from(privKey);
-    const sig = personalSign({ privateKey, data: msgHex });
+    const sig = personalSign({ privateKey, data: message as string });
     return sig;
   }
 
   // For eth_decryptMessage:
   async decryptMessage(
-    withAccount: string,
-    encryptedData: any,
+    withAccount: Hex,
+    encryptedData: Eip1024EncryptedData,
   ): Promise<string> {
-    const wallet = this.getWalletForAccount(withAccount);
+    const wallet = this.#getWalletForAccount(withAccount);
     const { privateKey: privateKeyAsUint8Array } = wallet;
     const privateKeyAsHex = Buffer.from(privateKeyAsUint8Array!).toString(
       'hex',
@@ -251,9 +285,9 @@ export default class HdKeyring {
   }
 
   // personal_signTypedData, signs data along with the schema
-  async signTypedData<T extends MessageTypes>(
-    withAccount: string,
-    typedData: TypedDataV1 | TypedMessage<T>,
+  async signTypedData(
+    withAccount: Hex,
+    typedData: Record<string, unknown> | TypedDataV1 | TypedMessage<any>,
     opts: KeyringOpt = { version: SignTypedDataVersion.V1 },
   ): Promise<string> {
     // Treat invalid versions as "V1"
@@ -263,52 +297,55 @@ export default class HdKeyring {
       ? opts.version!
       : SignTypedDataVersion.V1;
 
-    const privateKey: Uint8Array = this.getPrivateKeyFor(withAccount, opts);
+    const privateKey: Uint8Array = this.#getPrivateKeyFor(withAccount, opts);
     return signTypedData({
-      privateKey: privateKey as Buffer,
-      data: typedData,
+      privateKey: Buffer.from(privateKey),
+      data: typedData as unknown as TypedDataV1 | TypedMessage<any>,
       version,
     });
   }
 
-  removeAccount(account: string): void {
-    const address = normalize(account);
+  removeAccount(account: Hex): void {
+    const address = account;
+    assertIsStrictHexString(address);
     if (
-      !this._wallets
-        .map(({ publicKey }) => this.addressfromPublicKey(publicKey!))
+      !this.wallets
+        .map(({ publicKey }) => this.#addressfromPublicKey(publicKey!))
         .includes(address)
     ) {
       throw new Error(`Address ${address} not found in this keyring`);
     }
 
-    this._wallets = this._wallets.filter(
-      ({ publicKey }) => this.addressfromPublicKey(publicKey!) !== address,
+    this.wallets = this.wallets.filter(
+      ({ publicKey }) => this.#addressfromPublicKey(publicKey!) !== address,
     );
   }
 
   // get public key for nacl
   async getEncryptionPublicKey(
-    withAccount: string,
+    withAccount: Hex,
     opts: KeyringOpt = {},
   ): Promise<string> {
-    const privKey = this.getPrivateKeyFor(withAccount, opts);
-    const publicKey = getEncryptionPublicKey(privKey as unknown as string);
+    const privKey = this.#getPrivateKeyFor(withAccount, opts);
+    const publicKey = getEncryptionPublicKey(
+      Buffer.from(privKey).toString('hex'),
+    );
     return publicKey;
   }
 
-  private getPrivateKeyFor(address: string, opts: KeyringOpt = {}): Uint8Array {
+  #getPrivateKeyFor(address: Hex, opts: KeyringOpt = {}): Uint8Array {
     if (!address) {
       throw new Error('Must specify address.');
     }
-    const wallet = this.getWalletForAccount(address, opts);
+    const wallet = this.#getWalletForAccount(address, opts);
     return wallet.privateKey!;
   }
 
-  private getWalletForAccount(address: string, opts: KeyringOpt = {}): HDKey {
+  #getWalletForAccount(address: string, opts: KeyringOpt = {}): HDKey {
     const normalizedAddress = normalize(address);
-    let wallet: HDKey = this._wallets.find(({ publicKey }) => {
+    let wallet = this.wallets.find(({ publicKey }) => {
       // If a wallet is found, public key will not be null
-      return this.addressfromPublicKey(publicKey!) === normalizedAddress;
+      return this.#addressfromPublicKey(publicKey!) === normalizedAddress;
     })!;
     if (!wallet) {
       throw new Error('HD Keyring - Unable to find matching address.');
@@ -320,9 +357,8 @@ export default class HdKeyring {
       const appKeyBuffer = Buffer.concat([privateKey!, appKeyOriginBuffer]);
       const appKeyPrivateKey = arrToBufArr(keccak256(appKeyBuffer));
       const appKeyPublicKey = privateToPublic(appKeyPrivateKey);
-      // @ts-ignore
-      // wallet = { privateKey: appKeyPrivateKey, publicKey: appKeyPublicKey };
-      wallet = new HDKey({ privateKey: appKeyPrivateKey });
+      // @ts-ignore special case for appKey
+      wallet = { privateKey: appKeyPrivateKey, publicKey: appKeyPublicKey };
     }
 
     return wallet;
@@ -338,8 +374,8 @@ export default class HdKeyring {
    * as a string, an array of UTF-8 bytes, or a Buffer. Mnemonic input
    * passed as type buffer or array of UTF-8 bytes must be NFKD normalized.
    */
-  private initFromMnemonic(
-    mnemonic: string | Array<number> | Buffer | Uint8Array,
+  #initFromMnemonic(
+    mnemonic: string | Array<number> | Buffer | Uint8Array | JsCastedBuffer,
   ): void {
     if (this.root) {
       throw new Error(
@@ -347,7 +383,7 @@ export default class HdKeyring {
       );
     }
 
-    this.mnemonic = this.mnemonicToUint8Array(mnemonic);
+    this.mnemonic = this.#mnemonicToUint8Array(mnemonic);
 
     // validate before initializing
     const isValid = bip39.validateMnemonic(this.mnemonic, wordlist);
@@ -364,9 +400,13 @@ export default class HdKeyring {
   }
 
   // small helper function to convert publicKey in Uint8Array form to a publicAddress as a hex
-  private addressfromPublicKey(publicKey: Uint8Array): string {
-    return bufferToHex(
+  #addressfromPublicKey(publicKey: Uint8Array): Hex {
+    const address = bufferToHex(
       publicToAddress(Buffer.from(publicKey), true),
     ).toLowerCase();
+
+    assertIsStrictHexString(address);
+
+    return address;
   }
 }
