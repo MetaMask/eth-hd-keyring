@@ -20,7 +20,7 @@ import {
 import { TransactionFactory, Transaction as EthereumTx } from '@ethereumjs/tx';
 import { keccak256 } from 'ethereum-cryptography/keccak';
 import { Eip1024EncryptedData, Hex } from '@metamask/utils';
-import HdKeyring from './Hd-keyring';
+import HdKeyring from './HDKeyring';
 
 const OldHdKeyring = require('@metamask/eth-hd-keyring');
 
@@ -654,7 +654,7 @@ describe('hd-keyring', () => {
 
       await expect(
         keyring.signMessage(notKeyringAddress, message),
-      ).rejects.toThrow('HD Keyring - Unable to find matching address.');
+      ).rejects.toThrow('Eth-Hd-Keyring: Unable to find matching address.');
     });
   });
 
@@ -774,7 +774,7 @@ describe('hd-keyring', () => {
 
     it('throw error if account is not present', async function () {
       await expect(keyring.exportAccount(notKeyringAddress)).rejects.toThrow(
-        'HD Keyring - Unable to find matching address.',
+        'Eth-Hd-Keyring: Unable to find matching address.',
       );
     });
   });
@@ -805,7 +805,7 @@ describe('hd-keyring', () => {
     it('throw error if address is not present in the keyring', async function () {
       await expect(
         keyring.getEncryptionPublicKey(notKeyringAddress),
-      ).rejects.toThrow('HD Keyring - Unable to find matching address.');
+      ).rejects.toThrow('Eth-Hd-Keyring: Unable to find matching address.');
     });
   });
 
@@ -920,7 +920,7 @@ describe('hd-keyring', () => {
     it('throw error if address passed is not present in the keyring', async function () {
       await expect(
         keyring.decryptMessage(notKeyringAddress, encryptedMessage),
-      ).rejects.toThrow('HD Keyring - Unable to find matching address.');
+      ).rejects.toThrow('Eth-Hd-Keyring: Unable to find matching address.');
     });
 
     it('throw error if wrong encrypted data object is passed', async function () {
@@ -975,7 +975,7 @@ describe('hd-keyring', () => {
       const tx = TransactionFactory.fromTxData(txParams);
       await expect(
         keyring.signTransaction(notKeyringAddress, tx),
-      ).rejects.toThrow('HD Keyring - Unable to find matching address.');
+      ).rejects.toThrow('Eth-Hd-Keyring: Unable to find matching address.');
     });
   });
 });
