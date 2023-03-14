@@ -55,7 +55,7 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
 
   type: string;
 
-  private wallets: HDKey[] = [];
+  #wallets: HDKey[] = [];
 
   root: HDKey | undefined | null;
 
@@ -70,7 +70,7 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
   /* PUBLIC METHODS */
   constructor(opts: KeyringOpt = {}) {
     this.type = type;
-    this.wallets = [];
+    this.#wallets = [];
     this.deserialize(opts);
   }
 
@@ -141,7 +141,7 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
 
     return Promise.resolve({
       mnemonic: Array.from(uint8ArrayMnemonic),
-      numberOfAccounts: this.wallets.length,
+      numberOfAccounts: this.#wallets.length,
       hdPath: this.hdPath!,
     });
   }
@@ -160,7 +160,7 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
       );
     }
     this.opts = state;
-    this.wallets = [];
+    this.#wallets = [];
     this.mnemonic = null;
     this.root = null;
     this.hdPath = state.hdPath || hdPathString;
@@ -181,12 +181,12 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
       throw new Error('Eth-Hd-Keyring: No secret recovery phrase provided');
     }
 
-    const oldLen = this.wallets.length;
+    const oldLen = this.#wallets.length;
     const newWallets: HDKey[] = [];
     for (let i = oldLen; i < numberOfAccounts + oldLen; i++) {
       const wallet = this.root.deriveChild(i);
       newWallets.push(wallet);
-      this.wallets.push(wallet);
+      this.#wallets.push(wallet);
     }
 
     const hexWallets: Hex[] = newWallets.map((w) => {
@@ -198,7 +198,7 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
 
   getAccounts(): Promise<Hex[]> {
     return Promise.resolve(
-      this.wallets.map((w) => this.#addressfromPublicKey(w.publicKey!)),
+      this.#wallets.map((w) => this.#addressfromPublicKey(w.publicKey!)),
     );
   }
 
@@ -309,14 +309,14 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
   removeAccount(account: Hex): void {
     const address = account;
     if (
-      !this.wallets
+      !this.#wallets
         .map(({ publicKey }) => this.#addressfromPublicKey(publicKey!))
         .includes(address)
     ) {
       throw new Error(`Address ${address} not found in this keyring`);
     }
 
-    this.wallets = this.wallets.filter(
+    this.#wallets = this.#wallets.filter(
       ({ publicKey }) => this.#addressfromPublicKey(publicKey!) !== address,
     );
   }
@@ -343,7 +343,7 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
 
   #getWalletForAccount(address: string, opts: KeyringOpt = {}): HDKey {
     const normalizedAddress = normalize(address);
-    let wallet = this.wallets.find(({ publicKey }) => {
+    let wallet = this.#wallets.find(({ publicKey }) => {
       // If a wallet is found, public key will not be null
       return this.#addressfromPublicKey(publicKey!) === normalizedAddress;
     })!;
