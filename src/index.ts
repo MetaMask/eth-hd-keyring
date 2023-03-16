@@ -1,1 +1,1 @@
-export * from './Hd-keyring';
+export * from './HDKeyring';
