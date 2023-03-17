@@ -64,7 +64,7 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
 
   hdWallet: HDKey | undefined | null;
 
-  hdPath: string | undefined | null;
+  hdPath: string = hdPathString;
 
   opts: KeyringOpt | undefined | null;
 
@@ -135,10 +135,6 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
   serialize(): Promise<SerializedHdKeyringState> {
     if (!this.mnemonic) {
       throw new Error(HDKeyringErrors.MISSING_MNEMONIC);
-    }
-
-    if (!this.hdPath) {
-      throw new Error(HDKeyringErrors.MISSING_HD_PATH);
     }
 
     const mnemonicAsString = this.#uint8ArrayToString(this.mnemonic);
