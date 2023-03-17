@@ -48,8 +48,8 @@ type SerializedHdKeyringState = {
 };
 
 // Options:
-export const hdPathString = `m/44'/60'/0'/0`;
-export const type = 'HD Key Tree';
+const hdPathString = `m/44'/60'/0'/0`;
+const type = 'HD Key Tree';
 
 export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
   static type: string = type;
@@ -64,7 +64,7 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
 
   hdWallet: HDKey | undefined | null;
 
-  hdPath: string = hdPathString;
+  hdPath: string | undefined | null;
 
   opts: KeyringOpt | undefined | null;
 
@@ -135,6 +135,10 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
   serialize(): Promise<SerializedHdKeyringState> {
     if (!this.mnemonic) {
       throw new Error(HDKeyringErrors.MISSING_MNEMONIC);
+    }
+
+    if (!this.hdPath) {
+      throw new Error(HDKeyringErrors.MISSING_HD_PATH);
     }
 
     const mnemonicAsString = this.#uint8ArrayToString(this.mnemonic);
