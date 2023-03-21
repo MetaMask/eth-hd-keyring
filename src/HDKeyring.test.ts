@@ -19,7 +19,7 @@ import {
 } from '@ethereumjs/util';
 import { TransactionFactory, Transaction as EthereumTx } from '@ethereumjs/tx';
 import { keccak256 } from 'ethereum-cryptography/keccak';
-import { Eip1024EncryptedData, Hex } from '@metamask/utils';
+import { Eip1024EncryptedData, Hex, add0x } from '@metamask/utils';
 
 // we do not want to add this to dependency
 // eslint-disable-next-line node/no-unpublished-import
@@ -323,8 +323,8 @@ describe('hd-keyring', () => {
       ];
       keyring.generateRandomMnemonic();
       await keyring.addAccounts(1);
-      const addresses = await keyring.getAccounts();
-      const address = addresses[0] as Hex;
+      const addresses = await keyring.getAccounts(); // possible undefined if there aren't any wallets
+      const address = add0x(addresses[0] as string);
       const signature = await keyring.signTypedData(address, typedData);
       const restored = recoverTypedSignature({
         data: typedData,
