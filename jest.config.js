@@ -1,6 +1,4 @@
-import type { Config } from '@jest/types';
-
-const config: Config.InitialOptions = {
+const config = {
   collectCoverage: true,
   coverageReporters: ['text', 'html'],
   coverageThreshold: {
