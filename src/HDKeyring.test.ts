@@ -20,9 +20,11 @@ import {
 import { TransactionFactory, Transaction as EthereumTx } from '@ethereumjs/tx';
 import { keccak256 } from 'ethereum-cryptography/keccak';
 import { Eip1024EncryptedData, Hex } from '@metamask/utils';
-import HdKeyring from './HDKeyring';
 
-const OldHdKeyring = require('@metamask/eth-hd-keyring');
+// we do not want to add this to dependency
+// eslint-disable-next-line node/no-unpublished-import
+import OldHdKeyring from '@metamask/eth-hd-keyring';
+import HdKeyring from './HDKeyring';
 
 // Sample account:
 const privKeyHex =
@@ -52,11 +54,9 @@ describe('hd-keyring', () => {
           });
           const newAccounts = await newHDKeyring.getAccounts();
           const oldAccounts = await oldHDKeyring.getAccounts();
-          await expect(newAccounts[0]).toStrictEqual(oldAccounts[0]);
-
-          await expect(newAccounts[1]).toStrictEqual(oldAccounts[1]);
-
-          await expect(newAccounts[2]).toStrictEqual(oldAccounts[2]);
+          expect(newAccounts[0]).toStrictEqual(oldAccounts[0]);
+          expect(newAccounts[1]).toStrictEqual(oldAccounts[1]);
+          expect(newAccounts[2]).toStrictEqual(oldAccounts[2]);
         }),
       );
     });
@@ -165,6 +165,7 @@ describe('hd-keyring', () => {
       });
 
       expect(() => {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         keyring.deserialize({
           mnemonic: sampleMnemonic,
           numberOfAccounts: 1,
@@ -229,7 +230,7 @@ describe('hd-keyring', () => {
 
     it('throws if mnemnoic is not set', async () => {
       const keyring = new HdKeyring({});
-      expect(() => keyring.serialize()).toThrow(
+      await expect(keyring.serialize()).rejects.toThrow(
         'Eth-Hd-Keyring: Missing mnemonic when serializing',
       );
     });
@@ -269,7 +270,7 @@ describe('hd-keyring', () => {
 
       it('throws an error when no SRP has been generated yet', async () => {
         const keyring = new HdKeyring();
-        expect(() => keyring.addAccounts()).toThrow(
+        await expect(keyring.addAccounts()).rejects.toThrow(
           'Eth-Hd-Keyring: No secret recovery phrase provided',
         );
       });
@@ -323,7 +324,7 @@ describe('hd-keyring', () => {
       keyring.generateRandomMnemonic();
       await keyring.addAccounts(1);
       const addresses = await keyring.getAccounts();
-      const address = addHexPrefix(addresses[0]);
+      const address = addresses[0] as Hex;
       const signature = await keyring.signTypedData(address, typedData);
       const restored = recoverTypedSignature({
         data: typedData,
@@ -452,7 +453,7 @@ describe('hd-keyring', () => {
     it('can deserialize with an hdPath param and generate the same accounts.', async () => {
       const keyring = new HdKeyring();
       const hdPathString = `m/44'/60'/0'/0`;
-      keyring.deserialize({
+      await keyring.deserialize({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 1,
         hdPath: hdPathString,
@@ -466,7 +467,7 @@ describe('hd-keyring', () => {
     it('can deserialize with an hdPath param and generate different accounts.', async () => {
       const keyring = new HdKeyring();
       const hdPathString = `m/44'/60'/0'/1`;
-      keyring.deserialize({
+      await keyring.deserialize({
         mnemonic: sampleMnemonic,
         numberOfAccounts: 1,
         hdPath: hdPathString,
@@ -639,7 +640,7 @@ describe('hd-keyring', () => {
         numberOfAccounts: 1,
       });
 
-      // @ts-expect-error
+      // @ts-expect-error we inputting an invalid address
       await expect(keyring.signMessage('', message)).rejects.toThrow(
         'Must specify address.',
       );
@@ -742,7 +743,7 @@ describe('hd-keyring', () => {
 
     it('should throw error if the provided origin is not a string', async function () {
       // ignore this type error because we are trying to provide an incorrect type
-      // @ts-expect-error
+      // @ts-expect-error we are providing an incorrect origin key
       await expect(keyring.getAppKeyAddress(firstAcct, [])).rejects.toThrow(
         `'origin' must be a non-empty string`,
       );

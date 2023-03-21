@@ -27,19 +27,21 @@ import { Hex, Keyring, Eip1024EncryptedData } from '@metamask/utils';
 import { TxData, TypedTransaction } from '@ethereumjs/tx';
 import { HDKeyringErrors } from './errors';
 
+// TODO: Find out why when imported usin ES6, mnemonic changes
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const bip39 = require('@metamask/scure-bip39');
 
 type JsCastedBuffer = {
   type: string;
   data: any;
 };
-interface KeyringOpt {
-  mnemonic?: Buffer | JsCastedBuffer | string | Uint8Array | Array<number>;
+type KeyringOpt = {
+  mnemonic?: Buffer | JsCastedBuffer | string | Uint8Array | number[];
   numberOfAccounts?: number;
   hdPath?: string;
   withAppKeyOrigin?: string;
   version?: SignTypedDataVersion;
-}
+};
 
 type SerializedHdKeyringState = {
   mnemonic: number[];
@@ -72,6 +74,7 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
   constructor(opts: KeyringOpt = {}) {
     this.type = type;
     this.#wallets = [];
+    // eslint-disable-next-line  @typescript-eslint/no-floating-promises, @typescript-eslint/promise-function-async
     this.deserialize(opts);
   }
 
@@ -92,7 +95,7 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
   }
 
   #mnemonicToUint8Array(
-    mnemonic: Buffer | JsCastedBuffer | string | Uint8Array | Array<number>,
+    mnemonic: Buffer | JsCastedBuffer | string | Uint8Array | number[],
   ): Uint8Array {
     let mnemonicData = mnemonic;
     // when encrypted/decrypted, buffers get cast into js object with a property type set to buffer
@@ -132,9 +135,9 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
     return mnemonicData;
   }
 
-  serialize(): Promise<SerializedHdKeyringState> {
+  async serialize(): Promise<SerializedHdKeyringState> {
     if (!this.mnemonic) {
-      throw new Error(HDKeyringErrors.MISSING_MNEMONIC);
+      throw new Error(HDKeyringErrors.MissingMnemonic);
     }
 
     const mnemonicAsString = this.#uint8ArrayToString(this.mnemonic);
@@ -147,22 +150,24 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore return type is void
-  deserialize(state: KeyringOpt = {}): Promise<string[]> {
+  // eslint-disable-next-line @typescript-eslint/promise-function-async
+  deserialize(state: KeyringOpt = {}) {
     if (state.numberOfAccounts && !state.mnemonic) {
       throw new Error(
-        HDKeyringErrors.DESERIALIZE_ERROR_NUMBER_OF_ACCOUNT_WITH_MISSING_MNEMONIC,
+        HDKeyringErrors.DeserializeErrorNumberOfAccountWithMissingMnemonic,
       );
     }
 
     if (this.root) {
-      throw new Error(HDKeyringErrors.SRP_ALREADY_PROVIDED);
+      throw new Error(HDKeyringErrors.SRPAlreadyProvided);
     }
     this.opts = state;
     this.#wallets = [];
     this.mnemonic = null;
     this.root = null;
-    this.hdPath = state.hdPath || hdPathString;
+    this.hdPath = state.hdPath ?? hdPathString;
 
     if (state.mnemonic) {
       this.#initFromMnemonic(state.mnemonic);
@@ -175,9 +180,9 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
     return Promise.resolve([]);
   }
 
-  addAccounts(numberOfAccounts = 1): Promise<Hex[]> {
+  async addAccounts(numberOfAccounts = 1): Promise<Hex[]> {
     if (!this.root) {
-      throw new Error(HDKeyringErrors.NO_SRP_PROVIDED);
+      throw new Error(HDKeyringErrors.NoSRPProvided);
     }
 
     const oldLen = this.#wallets.length;
@@ -189,15 +194,23 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
     }
 
     const hexWallets: Hex[] = newWallets.map((w) => {
+      if (!w.publicKey) {
+        throw new Error(HDKeyringErrors.MissingPublicKey);
+      }
       // HDKey's method publicKey can return null
-      return this.#addressfromPublicKey(w.publicKey!);
+      return this.#addressfromPublicKey(w.publicKey);
     });
     return Promise.resolve(hexWallets);
   }
 
-  getAccounts(): Promise<Hex[]> {
+  async getAccounts(): Promise<Hex[]> {
     return Promise.resolve(
-      this.#wallets.map((w) => this.#addressfromPublicKey(w.publicKey!)),
+      this.#wallets.map((w) => {
+        if (!w.publicKey) {
+          throw new Error(HDKeyringErrors.MissingPublicKey);
+        }
+        return this.#addressfromPublicKey(w.publicKey);
+      }),
     );
   }
 
@@ -206,14 +219,18 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
   // returns an address specific to an app
   async getAppKeyAddress(address: Hex, origin: string): Promise<Hex> {
     if (!origin || typeof origin !== 'string') {
-      throw new Error(HDKeyringErrors.ORIGIN_NOT_EMPTY);
+      throw new Error(HDKeyringErrors.OriginNotEmpty);
     }
     const wallet = this.#getWalletForAccount(address, {
       withAppKeyOrigin: origin,
     });
+
+    if (!wallet.publicKey) {
+      throw new Error(HDKeyringErrors.MissingPublicKey);
+    }
     // normalize will prefix the address with 0x
     const appKeyAddress = normalize(
-      publicToAddress(Buffer.from(wallet.publicKey!)).toString('hex'),
+      publicToAddress(Buffer.from(wallet.publicKey)).toString('hex'),
     ) as Hex;
 
     return appKeyAddress;
@@ -223,7 +240,7 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
   async exportAccount(address: Hex, opts: KeyringOpt = {}): Promise<string> {
     const wallet = this.#getWalletForAccount(address, opts);
     if (!wallet.privateKey) {
-      throw new Error(HDKeyringErrors.MISSING_PRIVATE_KEY);
+      throw new Error(HDKeyringErrors.MissingPrivateKey);
     }
     return bytesToHex(wallet.privateKey);
   }
@@ -281,7 +298,7 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
     const wallet = this.#getWalletForAccount(withAccount);
     const { privateKey: privateKeyAsUint8Array } = wallet;
     if (!privateKeyAsUint8Array) {
-      throw new Error(HDKeyringErrors.MISSING_PRIVATE_KEY);
+      throw new Error(HDKeyringErrors.MissingPrivateKey);
     }
     const privateKeyAsHex = Buffer.from(privateKeyAsUint8Array).toString('hex');
     const sig = decrypt({ privateKey: privateKeyAsHex, encryptedData });
@@ -294,12 +311,16 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
     typedData: Record<string, unknown> | TypedDataV1 | TypedMessage<any>,
     opts: KeyringOpt = { version: SignTypedDataVersion.V1 },
   ): Promise<string> {
-    // Treat invalid versions as "V1"
-    const version: SignTypedDataVersion = Object.keys(
-      SignTypedDataVersion,
-    ).includes(opts.version as string)
-      ? opts.version!
-      : SignTypedDataVersion.V1;
+    let version: SignTypedDataVersion;
+    if (
+      opts.version &&
+      Object.keys(SignTypedDataVersion).includes(opts.version as string)
+    ) {
+      version = opts.version;
+    } else {
+      // Treat invalid versions as "V1"
+      version = SignTypedDataVersion.V1;
+    }
 
     const privateKey: Uint8Array = this.#getPrivateKeyFor(withAccount, opts);
     return signTypedData({
@@ -313,18 +334,23 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
     const address = account;
     if (
       !this.#wallets
-        .map(({ publicKey }) => this.#addressfromPublicKey(publicKey!))
+        .map(({ publicKey }) => {
+          if (!publicKey) {
+            throw new Error(HDKeyringErrors.MissingPublicKey);
+          }
+          return this.#addressfromPublicKey(publicKey);
+        })
         .includes(address)
     ) {
       throw new Error(
-        HDKeyringErrors.ADDRESS_NOT_FOUND.replace('$address', address),
+        HDKeyringErrors.AddressNotFound.replace('$address', address),
       );
     }
 
     this.#wallets = this.#wallets.filter(({ publicKey }) => {
       if (!publicKey) {
         // should never be here
-        throw new Error(HDKeyringErrors.MISSING_PUBLIC_KEY);
+        throw new Error(HDKeyringErrors.MissingPublicKey);
       }
       return this.#addressfromPublicKey(publicKey) !== address;
     });
@@ -344,11 +370,11 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
 
   #getPrivateKeyFor(address: Hex, opts: KeyringOpt = {}): Uint8Array {
     if (!address) {
-      throw new Error(HDKeyringErrors.ADDRESS_NOT_PROVIDED);
+      throw new Error(HDKeyringErrors.AddressNotProvided);
     }
     const wallet = this.#getWalletForAccount(address, opts);
     if (!wallet.privateKey) {
-      throw new Error(HDKeyringErrors.MISSING_PRIVATE_KEY);
+      throw new Error(HDKeyringErrors.MissingPrivateKey);
     }
     return wallet.privateKey;
   }
@@ -356,24 +382,32 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
   #getWalletForAccount(address: string, opts: KeyringOpt = {}): HDKey {
     const normalizedAddress = normalize(address);
     let wallet = this.#wallets.find(({ publicKey }) => {
+      if (!publicKey) {
+        throw new Error(HDKeyringErrors.MissingPublicKey);
+      }
       // If a wallet is found, public key will not be null
-      return this.#addressfromPublicKey(publicKey!) === normalizedAddress;
-    })!;
-    if (!wallet) {
-      throw new Error(HDKeyringErrors.NO_MATCHING_ADDRESS);
-    }
+      return this.#addressfromPublicKey(publicKey) === normalizedAddress;
+    });
 
     if (opts.withAppKeyOrigin) {
+      if (!wallet) {
+        throw new Error(HDKeyringErrors.NoMatchingAddress);
+      }
       const { privateKey } = wallet;
       if (!privateKey) {
-        throw new Error(HDKeyringErrors.MISSING_PRIVATE_KEY);
+        throw new Error(HDKeyringErrors.MissingPrivateKey);
       }
       const appKeyOriginBuffer = Buffer.from(opts.withAppKeyOrigin, 'utf8');
       const appKeyBuffer = Buffer.concat([privateKey, appKeyOriginBuffer]);
       const appKeyPrivateKey = arrToBufArr(keccak256(appKeyBuffer));
       const appKeyPublicKey = privateToPublic(appKeyPrivateKey);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore special case for appKey
       wallet = { privateKey: appKeyPrivateKey, publicKey: appKeyPublicKey };
+    }
+
+    if (!wallet) {
+      throw new Error(HDKeyringErrors.NoMatchingAddress);
     }
 
     return wallet;
@@ -385,15 +419,15 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
    * Sets appropriate properties for the keyring based on the given
    * BIP39-compliant mnemonic.
    *
-   * @param {string|Array<number>|Buffer} mnemonic - A seed phrase represented
+   * @param mnemonic - A seed phrase represented
    * as a string, an array of UTF-8 bytes, or a Buffer. Mnemonic input
    * passed as type buffer or array of UTF-8 bytes must be NFKD normalized.
    */
   #initFromMnemonic(
-    mnemonic: string | Array<number> | Buffer | Uint8Array | JsCastedBuffer,
+    mnemonic: string | number[] | Buffer | Uint8Array | JsCastedBuffer,
   ): void {
     if (this.root) {
-      throw new Error(HDKeyringErrors.SRP_ALREADY_PROVIDED);
+      throw new Error(HDKeyringErrors.SRPAlreadyProvided);
     }
 
     this.mnemonic = this.#mnemonicToUint8Array(mnemonic);
@@ -401,16 +435,16 @@ export default class HdKeyring implements Keyring<SerializedHdKeyringState> {
     // validate before initializing
     const isValid = bip39.validateMnemonic(this.mnemonic, wordlist);
     if (!isValid) {
-      throw new Error(HDKeyringErrors.INVALID_SRP);
+      throw new Error(HDKeyringErrors.InvalidSRP);
     }
 
     // eslint-disable-next-line node/no-sync
     const seed = bip39.mnemonicToSeedSync(this.mnemonic, wordlist);
     this.hdWallet = HDKey.fromMasterSeed(seed);
     if (!this.hdPath) {
-      throw new Error(HDKeyringErrors.MISSING_HD_PATH);
+      throw new Error(HDKeyringErrors.MissingHdPath);
     }
-    this.root = this.hdWallet.derive(this.hdPath!);
+    this.root = this.hdWallet.derive(this.hdPath);
   }
 
   // small helper function to convert publicKey in Uint8Array form to a publicAddress as a hex
