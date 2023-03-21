@@ -954,7 +954,8 @@ describe('hd-keyring', () => {
       expect(tx.isSigned()).toBe(false);
 
       const signed = await keyring.signTransaction(firstAcct, tx);
-      expect((signed as unknown as EthereumTx).isSigned()).toBe(true);
+      const signedTx = TransactionFactory.fromTxData(signed);
+      expect(signedTx.isSigned()).toBe(true);
     });
 
     it('returns a signed tx object', async function () {
@@ -962,7 +963,8 @@ describe('hd-keyring', () => {
       expect(tx.isSigned()).toBe(false);
 
       const signed = await keyring.signTransaction(firstAcct, tx);
-      expect((signed as unknown as EthereumTx).isSigned()).toBe(true);
+      const signedTx = TransactionFactory.fromTxData(signed);
+      expect(signedTx.isSigned()).toBe(true);
     });
 
     it('returns rejected promise if empty address is passed', async function () {
