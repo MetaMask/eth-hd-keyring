@@ -1,4 +1,4 @@
-const config = {
+module.exports = {
   collectCoverage: true,
   coverageReporters: ['text', 'html'],
   coverageThreshold: {
@@ -24,5 +24,3 @@ const config = {
     '^.+\\.tsx?$': 'ts-jest',
   },
 };
-
-export default config;

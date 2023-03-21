@@ -1,33 +1,36 @@
 module.exports = {
   root: true,
-  parser: '@typescript-eslint/parser',
-  extends: ['@metamask/eslint-config', '@metamask/eslint-config-nodejs'],
+
+  extends: ['@metamask/eslint-config'],
 
   overrides: [
     {
-      files: ['**/*.test.ts'],
-      extends: ['@metamask/eslint-config-jest'],
-      rules: {
-        'node/no-unpublished-require': 0,
+      files: ['*.ts'],
+      extends: ['@metamask/eslint-config-typescript'],
+    },
+
+    {
+      files: ['*.js'],
+      parserOptions: {
+        sourceType: 'script',
       },
+      extends: ['@metamask/eslint-config-nodejs'],
+    },
+
+    {
+      files: ['*.test.ts', '*.test.js'],
+      extends: [
+        '@metamask/eslint-config-jest',
+        '@metamask/eslint-config-nodejs',
+      ],
     },
   ],
-
-  settings: {
-    'import/resolver': {
-      node: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx'],
-      },
-    },
-    node: {
-      tryExtensions: ['.js', '.json', '.node', '.ts'],
-    },
-  },
 
   ignorePatterns: [
     '!.eslintrc.js',
     '!.prettierrc.js',
-    'dist/**/*',
-    'jest.config.ts',
+    'dist/',
+    'docs/',
+    '.yarn/',
   ],
 };
