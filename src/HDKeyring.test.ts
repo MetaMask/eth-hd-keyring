@@ -126,8 +126,7 @@ describe('hd-keyring', () => {
 
     it('throws when numberOfAccounts is passed with no mnemonic', async () => {
       expect(() => {
-        // we are forcing a failure
-        // eslint-disable-next-line
+        // eslint-disable-next-line no-new
         new HdKeyring({
           numberOfAccounts: 1,
         });
@@ -228,7 +227,7 @@ describe('hd-keyring', () => {
       expect(mnemonicAsString).toStrictEqual(sampleMnemonic);
     });
 
-    it('throws is mnemnoic is not set', async () => {
+    it('throws if mnemnoic is not set', async () => {
       const keyring = new HdKeyring({});
       expect(() => keyring.serialize()).toThrow(
         'Eth-Hd-Keyring: Missing mnemonic when serializing',
@@ -324,7 +323,7 @@ describe('hd-keyring', () => {
       keyring.generateRandomMnemonic();
       await keyring.addAccounts(1);
       const addresses = await keyring.getAccounts();
-      const address = addresses[0] as Hex;
+      const address = addHexPrefix(addresses[0]);
       const signature = await keyring.signTypedData(address, typedData);
       const restored = recoverTypedSignature({
         data: typedData,
@@ -640,7 +639,8 @@ describe('hd-keyring', () => {
         numberOfAccounts: 1,
       });
 
-      await expect(keyring.signMessage('' as Hex, message)).rejects.toThrow(
+      // @ts-expect-error
+      await expect(keyring.signMessage('', message)).rejects.toThrow(
         'Must specify address.',
       );
     });
@@ -742,7 +742,7 @@ describe('hd-keyring', () => {
 
     it('should throw error if the provided origin is not a string', async function () {
       // ignore this type error because we are trying to provide an incorrect type
-      // @ts-ignore
+      // @ts-expect-error
       await expect(keyring.getAppKeyAddress(firstAcct, [])).rejects.toThrow(
         `'origin' must be a non-empty string`,
       );
