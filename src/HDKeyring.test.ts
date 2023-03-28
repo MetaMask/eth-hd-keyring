@@ -22,6 +22,8 @@ import { keccak256 } from 'ethereum-cryptography/keccak';
 import { Eip1024EncryptedData, Hex, add0x, assert } from '@metamask/utils';
 
 // we do not want to add this to dependency
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - TS7016: Could not find a declaration file for module
 // eslint-disable-next-line node/no-unpublished-import
 import OldHDKeyring from '@metamask/eth-hd-keyring';
 import { HDKeyring } from './HDKeyring';
