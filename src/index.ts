@@ -1,3 +1,1 @@
-import HdKeyring from './HDKeyring';
-
-export default HdKeyring;
+export { HDKeyring } from './HDKeyring';
