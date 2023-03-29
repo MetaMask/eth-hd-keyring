@@ -676,9 +676,12 @@ describe('hd-keyring', () => {
 
     describe('if the account exists', function () {
       it('should remove that account', async function () {
-        const addresses = await keyring.getAccounts();
-        expect(addresses).toHaveLength(1);
-        keyring.removeAccount(addresses[0] as Hex);
+        const rawAddresses = await keyring.getAccounts();
+        const [rawAddress] = rawAddresses;
+        expect(rawAddresses).toHaveLength(1);
+        assert(rawAddress, 'rawAddress should be empty');
+        const address = add0x(rawAddress);
+        keyring.removeAccount(address);
         const addressesAfterRemoval = await keyring.getAccounts();
         expect(addressesAfterRemoval).toHaveLength(0);
       });
@@ -748,7 +751,6 @@ describe('hd-keyring', () => {
     });
 
     it('should throw error if the provided origin is not a string', async function () {
-      // ignore this type error because we are trying to provide an incorrect type
       // @ts-expect-error we are providing an incorrect origin key
       await expect(keyring.getAppKeyAddress(firstAcct, [])).rejects.toThrow(
         `'origin' must be a non-empty string`,
