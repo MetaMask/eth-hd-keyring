@@ -1,0 +1,1 @@
+export { HDKeyring } from './HDKeyring';
