@@ -1320,7 +1320,7 @@ __metadata:
     "@metamask/eslint-config-typescript": ^11.1.0
     "@metamask/eth-hd-keyring": 4.0.1
     "@metamask/eth-sig-util": ^5.0.2
-    "@metamask/scure-bip39": ^2.0.3
+    "@metamask/scure-bip39": ^2.1.0
     "@metamask/utils": ^5.0.2
     "@types/jest": ^29.4.0
     "@types/node": ^18.14.6
@@ -1371,13 +1371,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metamask/scure-bip39@npm:^2.0.3":
-  version: 2.0.3
-  resolution: "@metamask/scure-bip39@npm:2.0.3"
+"@metamask/scure-bip39@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@metamask/scure-bip39@npm:2.1.0"
   dependencies:
     "@noble/hashes": ~1.1.1
     "@scure/base": ~1.1.0
-  checksum: a1655adbab6165c833db7e1a2f46a9617503b79016b06e025e15babd5ba8bce682598fe939851ce88fff451c9833e0362003c9ba7c68b3bf1e7cc09bdfe9fa4c
+  checksum: 13e07f03077472e9b230f702cbba7848ecac752028396647ccdeedd7bc280ceb50ee15203e25603f05c4c6ca5d4dc7277825f7004beb113e1a415adc91f059f9
   languageName: node
   linkType: hard
 
