@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@ethereumjs/tx": "^4.1.1",
-    "@ethereumjs/util": "^8.1.0",
+    "@ethereumjs/util": "^8.0.5",
     "@metamask/bip39": "^4.0.0",
     "@metamask/eth-sig-util": "^5.0.2",
     "@metamask/scure-bip39": "^2.0.3",
