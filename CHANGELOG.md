@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.1]
+### Uncategorized
+- Bump word-wrap from 1.2.3 to 1.2.4 ([#93](https://github.com/MetaMask/eth-hd-keyring/pull/93))
+- Bump semver from 6.3.0 to 6.3.1 ([#92](https://github.com/MetaMask/eth-hd-keyring/pull/92))
+- Typescript migration ([#90](https://github.com/MetaMask/eth-hd-keyring/pull/90))
+- Bump http-cache-semantics from 4.1.0 to 4.1.1 ([#86](https://github.com/MetaMask/eth-hd-keyring/pull/86))
+- Delete `.yarnrc` file ([#85](https://github.com/MetaMask/eth-hd-keyring/pull/85))
+
 ## [6.0.0]
 ### Changed
 - Revert mnemonic serialization format from `Record<number, number>` (i.e. a stringified `Uint8Array`) which was introduced in v5.0.0 back to an untyped array of utf8 encoded bytes, which was the format prior to v5.0.0 ([#81](https://github.com/MetaMask/eth-hd-keyring/pull/81))
@@ -58,7 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Deserialize method (and `HdKeyring` constructor by extension) can no longer be passed an options object containing a value for `numberOfAccounts` if it is not also containing a value for `mnemonic`.
 - Package name changed from `eth-hd-keyring` to `@metamask/eth-hd-keyring`.
 
-[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.0...HEAD
+[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.1...HEAD
+[6.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.1...v6.0.0
 [5.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.2...v5.0.0
