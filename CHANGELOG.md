@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Export Typescript definitions ([#90](https://github.com/MetaMask/eth-hd-keyring/pull/90))
 
 ### Fixed
-- Bump dependencies  ([#94](https://github.com/MetaMask/eth-hd-keyring/pull/94))
+- Bump dependencies ([#94](https://github.com/MetaMask/eth-hd-keyring/pull/94))
   * `@ethereumjs/util` from `^8.0.2` to `^8.1.0`
   * `@metamask/eth-sig-util` from `^5.0.2` to `^6.0.0`
   * `@metamask/scure-bip39` from `^2.0.3` to `^2.1.0`
