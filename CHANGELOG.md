@@ -7,12 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [6.0.1]
-### Uncategorized
-- Bump word-wrap from 1.2.3 to 1.2.4 ([#93](https://github.com/MetaMask/eth-hd-keyring/pull/93))
-- Bump semver from 6.3.0 to 6.3.1 ([#92](https://github.com/MetaMask/eth-hd-keyring/pull/92))
-- Typescript migration ([#90](https://github.com/MetaMask/eth-hd-keyring/pull/90))
-- Bump http-cache-semantics from 4.1.0 to 4.1.1 ([#86](https://github.com/MetaMask/eth-hd-keyring/pull/86))
-- Delete `.yarnrc` file ([#85](https://github.com/MetaMask/eth-hd-keyring/pull/85))
+### Added
+- Export Typescript definitions ([#90](https://github.com/MetaMask/eth-hd-keyring/pull/90))
+
+### Fixed
+- Bump dependencies  ([#94](https://github.com/MetaMask/eth-hd-keyring/pull/94))
+  * `@ethereumjs/util` from `^8.0.2` to `^8.1.0`
+  * `@metamask/eth-sig-util` from `^5.0.2` to `^6.0.0`
+  * `@metamask/scure-bip39` from `^2.0.3` to `^2.1.0`
+  * `@metamask/utils` from `^5.0.0` to `^5.0.2`
+  * `ethereum-cryptography` from `^1.1.2` to `^1.2.0`
 
 ## [6.0.0]
 ### Changed
