@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [7.0.0]
 ### Changed
 - **BREAKING:** Update minimum Node.js version from v14 to v16 ([#98](https://github.com/MetaMask/eth-hd-keyring/pull/98))
-- Bumped dependencies ([#99](https://github.com/MetaMask/eth-hd-keyring/pull/99))
+- Bump dependencies ([#99](https://github.com/MetaMask/eth-hd-keyring/pull/99))
   * **BREAKING:** `@metamask/eth-sig-util` from `^6.0.0` to `^7.0.0`
   * `@ethereumjs/tx` from `^4.1.1` to `^4.2.0`
   * `@ethereumjs/util` from `8.0.5` to `^8.1.0`
