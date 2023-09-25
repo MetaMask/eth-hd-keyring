@@ -23,7 +23,8 @@ import {
   TypedDataV1,
   TypedMessage,
 } from '@metamask/eth-sig-util';
-import { Hex, Keyring, Eip1024EncryptedData } from '@metamask/utils';
+import type { Hex, Keyring, Eip1024EncryptedData } from '@metamask/utils';
+import { isStrictHexString } from '@metamask/utils';
 import { TxData, TypedTransaction } from '@ethereumjs/tx';
 import { HDKeyringErrors } from './errors';
 
@@ -261,9 +262,12 @@ export class HDKeyring implements Keyring<SerializedHdKeyringState> {
   // For eth_sign, we need to sign arbitrary data:
   async signMessage(
     address: Hex,
-    data: string,
+    data: Hex,
     opts: KeyringOpt = {},
   ): Promise<string> {
+    if (!isStrictHexString(data)) {
+      throw new Error('Invalid input: data is not a hex string');
+    }
     const message: string = stripHexPrefix(data);
     const privKey: Uint8Array = this.#getPrivateKeyFor(address, opts);
     const msgSig: ECDSASignature = ecsign(

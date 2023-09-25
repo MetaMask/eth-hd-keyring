@@ -605,7 +605,7 @@ describe('hd-keyring', () => {
       const localMessage = 'hello there!';
       const msgHashHex = bufferToHex(
         Buffer.from(keccak256(Buffer.from(localMessage))),
-      );
+      ) as Hex;
       await keyring.addAccounts(9);
       const addresses = await keyring.getAccounts();
       const signatures = await Promise.all(
@@ -634,8 +634,8 @@ describe('hd-keyring', () => {
         numberOfAccounts: 1,
       });
 
-      await expect(keyring.signMessage(firstAcct, '')).rejects.toThrow(
-        'Cannot convert 0x to a BigInt',
+      await expect(keyring.signMessage(firstAcct, '' as Hex)).rejects.toThrow(
+        'Invalid input: data is not a hex string',
       );
     });
 
