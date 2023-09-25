@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.0.0]
+### Changed
+- **BREAKING:** Update minimum Node.js version from v14 to v16 ([#98](https://github.com/MetaMask/eth-hd-keyring/pull/98))
+- Bump dependencies ([#99](https://github.com/MetaMask/eth-hd-keyring/pull/99))
+  * **BREAKING:** `@metamask/eth-sig-util` from `^6.0.0` to `^7.0.0`
+  * **BREAKING:** `@metamask/utils` from `^5.0.2` to `^8.1.0`
+  * `@ethereumjs/tx` from `^4.1.1` to `^4.2.0`
+  * `@ethereumjs/util` from `8.0.5` to `^8.1.0`
+  * `ethereum-cryptography` from `^1.2.0` to `^2.1.2`
+
 ## [6.0.1]
 ### Added
 - Export Typescript definitions ([#90](https://github.com/MetaMask/eth-hd-keyring/pull/90))
@@ -70,7 +80,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Deserialize method (and `HdKeyring` constructor by extension) can no longer be passed an options object containing a value for `numberOfAccounts` if it is not also containing a value for `mnemonic`.
 - Package name changed from `eth-hd-keyring` to `@metamask/eth-hd-keyring`.
 
-[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.1...HEAD
+[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v7.0.0...HEAD
+[7.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.1...v7.0.0
 [6.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.1...v6.0.0
 [5.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.0...v5.0.1
