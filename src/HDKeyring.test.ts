@@ -634,8 +634,8 @@ describe('hd-keyring', () => {
         numberOfAccounts: 1,
       });
 
-      await expect(keyring.signMessage(firstAcct, '' as Hex)).rejects.toThrow(
-        'Invalid input: data is not a hex string',
+      await expect(keyring.signMessage(firstAcct, '')).rejects.toThrow(
+        'Value must be a hexadecimal string',
       );
     });
 
