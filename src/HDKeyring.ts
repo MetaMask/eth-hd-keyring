@@ -2,7 +2,6 @@ import { HDKey } from 'ethereum-cryptography/hdkey';
 import { keccak256 } from 'ethereum-cryptography/keccak';
 import { bytesToHex } from 'ethereum-cryptography/utils';
 import {
-  stripHexPrefix,
   privateToPublic,
   publicToAddress,
   ecsign,
@@ -23,7 +22,8 @@ import {
   TypedDataV1,
   TypedMessage,
 } from '@metamask/eth-sig-util';
-import { Hex, Keyring, Eip1024EncryptedData } from '@metamask/utils';
+import type { Hex, Keyring, Eip1024EncryptedData } from '@metamask/utils';
+import { assertIsHexString, remove0x } from '@metamask/utils';
 import { TxData, TypedTransaction } from '@ethereumjs/tx';
 import { HDKeyringErrors } from './errors';
 
@@ -264,7 +264,8 @@ export class HDKeyring implements Keyring<SerializedHdKeyringState> {
     data: string,
     opts: KeyringOpt = {},
   ): Promise<string> {
-    const message: string = stripHexPrefix(data);
+    assertIsHexString(data);
+    const message: string = remove0x(data);
     const privKey: Uint8Array = this.#getPrivateKeyFor(address, opts);
     const msgSig: ECDSASignature = ecsign(
       Buffer.from(message, 'hex'),
