@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `@ethereumjs/util` from `8.0.5` to `^8.1.0`
   * `ethereum-cryptography` from `^1.2.0` to `^2.1.2`
 
+## [7.0.0] [RETRACTED]
+### Changed
+- This version was retracted due to a bug causing code to be missing from published package.
+
 ## [6.0.2]
 ### Fixed
 - Bump dependencies ([#94](https://github.com/MetaMask/eth-hd-keyring/pull/94))
@@ -24,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `@metamask/scure-bip39` from `^2.0.3` to `^2.1.0`
   * `@metamask/utils` from `^5.0.0` to `^5.0.2`
   * `ethereum-cryptography` from `^1.1.2` to `^1.2.0`
+
+## [6.0.1] [RETRACTED]
+### Changed
+- This version was retracted due to a bug causing code to be missing from published package.
 
 ## [6.0.0]
 ### Changed
@@ -78,8 +86,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Package name changed from `eth-hd-keyring` to `@metamask/eth-hd-keyring`.
 
 [Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v7.0.1...HEAD
-[7.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.2...v7.0.1
-[6.0.2]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.0...v6.0.2
+[7.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v7.0.0...v7.0.1
+[7.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.2...v7.0.0
+[6.0.2]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.1...v6.0.2
+[6.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.1...v6.0.0
 [5.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.2...v5.0.0
