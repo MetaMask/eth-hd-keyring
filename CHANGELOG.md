@@ -6,10 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [6.0.1]
-### Added
-- Export Typescript definitions ([#90](https://github.com/MetaMask/eth-hd-keyring/pull/90))
-
+## [6.0.2]
 ### Fixed
 - Bump dependencies ([#94](https://github.com/MetaMask/eth-hd-keyring/pull/94))
   * `@ethereumjs/util` from `^8.0.2` to `^8.1.0`
@@ -17,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `@metamask/scure-bip39` from `^2.0.3` to `^2.1.0`
   * `@metamask/utils` from `^5.0.0` to `^5.0.2`
   * `ethereum-cryptography` from `^1.1.2` to `^1.2.0`
+
+## [6.0.1] [RETRACTED]
+### Changed
+- This version was retracted due to a bug causing code to be missing from published package.
 
 ## [6.0.0]
 ### Changed
@@ -70,7 +71,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Deserialize method (and `HdKeyring` constructor by extension) can no longer be passed an options object containing a value for `numberOfAccounts` if it is not also containing a value for `mnemonic`.
 - Package name changed from `eth-hd-keyring` to `@metamask/eth-hd-keyring`.
 
-[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.1...HEAD
+[Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.2...HEAD
+[6.0.2]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.1...v6.0.2
 [6.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.1...v6.0.0
 [5.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.0...v5.0.1
