@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `@metamask/utils` from `^5.0.0` to `^5.0.2`
   * `ethereum-cryptography` from `^1.1.2` to `^1.2.0`
 
+## [6.0.1] [RETRACTED]
+### Changed
+- This version was retracted due to a bug causing code to be missing from published package.
+
 ## [6.0.0]
 ### Changed
 - Revert mnemonic serialization format from `Record<number, number>` (i.e. a stringified `Uint8Array`) which was introduced in v5.0.0 back to an untyped array of utf8 encoded bytes, which was the format prior to v5.0.0 ([#81](https://github.com/MetaMask/eth-hd-keyring/pull/81))
@@ -68,7 +72,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Package name changed from `eth-hd-keyring` to `@metamask/eth-hd-keyring`.
 
 [Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.2...HEAD
-[6.0.2]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.0...v6.0.2
+[6.0.2]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.1...v6.0.2
+[6.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.1...v6.0.0
 [5.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.2...v5.0.0
