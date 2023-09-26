@@ -7,11 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [6.0.2]
-
-## [6.0.1]
-### Added
-- Export Typescript definitions ([#90](https://github.com/MetaMask/eth-hd-keyring/pull/90))
-
 ### Fixed
 - Bump dependencies ([#94](https://github.com/MetaMask/eth-hd-keyring/pull/94))
   * `@ethereumjs/util` from `^8.0.2` to `^8.1.0`
@@ -73,8 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Package name changed from `eth-hd-keyring` to `@metamask/eth-hd-keyring`.
 
 [Unreleased]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.2...HEAD
-[6.0.2]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.1...v6.0.2
-[6.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.0...v6.0.1
+[6.0.2]: https://github.com/MetaMask/eth-hd-keyring/compare/v6.0.0...v6.0.2
 [6.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.1...v6.0.0
 [5.0.1]: https://github.com/MetaMask/eth-hd-keyring/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/MetaMask/eth-hd-keyring/compare/v4.0.2...v5.0.0
