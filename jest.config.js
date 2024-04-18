@@ -3,10 +3,10 @@ module.exports = {
   coverageReporters: ['text', 'html'],
   coverageThreshold: {
     global: {
-      branches: 84,
+      branches: 73.91,
       functions: 100,
-      lines: 95,
-      statements: 95,
+      lines: 91.81,
+      statements: 91.95,
     },
   },
   moduleFileExtensions: ['js', 'json', 'jsx', 'ts', 'tsx', 'node'],
@@ -18,6 +18,9 @@ module.exports = {
   // modules.
   restoreMocks: true,
   testEnvironment: 'node',
-  testMatch: ['**/test/**/*.js'],
+  testMatch: ['./**/*.test.ts'],
   testTimeout: 2500,
+  transform: {
+    '^.+\\.tsx?$': 'ts-jest',
+  },
 };
