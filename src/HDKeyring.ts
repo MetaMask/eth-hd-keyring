@@ -57,7 +57,7 @@ const type = 'HD Key Tree';
 export class HDKeyring implements Keyring<SerializedHdKeyringState> {
   static type: string = type;
 
-  type: string;
+  type: string = type;
 
   #wallets: HDKey[] = [];
 
