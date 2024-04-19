@@ -54,7 +54,7 @@ type SerializedHdKeyringState = {
 const hdPathString = `m/44'/60'/0'/0`;
 const type = 'HD Key Tree';
 
-export class HDKeyring implements Keyring<SerializedHdKeyringState> {
+export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
   static type: string = type;
 
   type: string = type;

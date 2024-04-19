@@ -1,1 +1,1 @@
-export { HDKeyring } from './HDKeyring';
+export { default } from './HDKeyring';
