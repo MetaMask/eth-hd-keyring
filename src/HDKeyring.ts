@@ -80,10 +80,20 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     });
   }
 
+  /**
+   * Generates a random mnemonic and initializes the HDKeyring from it.
+   */
   generateRandomMnemonic() {
     this.#initFromMnemonic(bip39.generateMnemonic(wordlist));
   }
 
+  /**
+   * Converts a Uint8Array to a string representation using the provided wordlist.
+   *
+   * @private
+   * @param mnemonic - The Uint8Array to convert.
+   * @returns The string representation of the Uint8Array.
+   */
   #uint8ArrayToString(mnemonic: Uint8Array): string {
     const recoveredIndices = Array.from(
       new Uint16Array(new Uint8Array(mnemonic).buffer),
@@ -91,11 +101,25 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     return recoveredIndices.map((i) => wordlist[i]).join(' ');
   }
 
+  /**
+   * Converts a mnemonic string to a Uint8Array.
+   *
+   * @private
+   * @param mnemonic - The mnemonic string to convert.
+   * @returns The Uint8Array representation of the mnemonic.
+   */
   #stringToUint8Array(mnemonic: string): Uint8Array {
     const indices = mnemonic.split(' ').map((word) => wordlist.indexOf(word));
     return new Uint8Array(new Uint16Array(indices).buffer);
   }
 
+  /**
+   * Converts the mnemonic to a Uint8Array.
+   *
+   * @private
+   * @param mnemonic - The mnemonic to convert.
+   * @returns The converted Uint8Array.
+   */
   #mnemonicToUint8Array(
     mnemonic: Buffer | JsCastedBuffer | string | Uint8Array | number[],
   ): Uint8Array {
@@ -137,6 +161,12 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     return mnemonicData;
   }
 
+  /**
+   * Serializes the HDKeyring instance into a serialized state.
+   *
+   * @returns A promise that resolves to the serialized state of the HDKeyring.
+   * @throws {Error} If the mnemonic is missing.
+   */
   async serialize(): Promise<SerializedHdKeyringState> {
     if (!this.mnemonic) {
       throw new Error(HDKeyringErrors.MissingMnemonic);
@@ -152,6 +182,14 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     });
   }
 
+  /**
+   * Deserializes the keyring state.
+   *
+   * @param state - The keyring state to deserialize.
+   * @returns A promise that resolves when the deserialization is complete.
+   * @throws {Error} If the `numberOfAccounts` is provided without the `mnemonic`.
+   * @throws {Error} If the keyring has already been initialized.
+   */
   async deserialize(state: KeyringOpt = {}): Promise<void> {
     if (state.numberOfAccounts && !state.mnemonic) {
       throw new Error(
@@ -177,7 +215,13 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     }
   }
 
-  async addAccounts(numberOfAccounts = 1): Promise<Hex[]> {
+  /**
+   * Adds accounts to the HDKeyring.
+   *
+   * @param index - The index of the account to add. Defaults to 1.
+   * @returns A promise that resolves to an array of hexadecimal account addresses.
+   * @throws {Error} If no SRP (Secure Remote Password) is provided.
+   */
     if (!this.root) {
       throw new Error(HDKeyringErrors.NoSRPProvided);
     }
@@ -190,7 +234,13 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
       this.#wallets.push(wallet);
     }
 
-    const hexWallets: Hex[] = newWallets.map((wallet) => {
+  /**
+   * Retrieves the accounts associated with the HD keyring that is ordered by index.
+   *
+   * @returns A promise that resolves to an array of hexadecimal account addresses.
+   * @throws {Error} If the public key is missing for any wallet.
+   */
+  async getAccounts(): Promise<Hex[]> {
       if (!wallet.publicKey) {
         throw new Error(HDKeyringErrors.MissingPublicKey);
       }
@@ -213,7 +263,14 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
 
   /* BASE KEYRING METHODS */
 
-  // returns an address specific to an app
+  /**
+   * Retrieves the application key address for a given Ethereum address and origin.
+   *
+   * @param address - The Ethereum address for which to retrieve the application key address.
+   * @param origin - The origin of the application key.
+   * @returns The application key address as a hexadecimal string.
+   * @throws {Error} If the origin is empty or not a string, or if the wallet's public key is missing.
+   */
   async getAppKeyAddress(address: Hex, origin: string): Promise<Hex> {
     if (!origin || typeof origin !== 'string') {
       throw new Error(HDKeyringErrors.OriginNotEmpty);
@@ -233,7 +290,14 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     return appKeyAddress;
   }
 
-  // exportAccount should return a hex-encoded private key:
+  /**
+   * Exports the account associated with the given address that is hex-encoded private key.
+   *
+   * @param address - The address of the account to export.
+   * @param opts - Optional parameters for exporting the account.
+   * @returns A Promise that resolves to the exported account as a string.
+   * @throws {Error} If the private key is missing for the account.
+   */
   async exportAccount(address: Hex, opts: KeyringOpt = {}): Promise<string> {
     const wallet = this.#getWalletForAccount(address, opts);
     if (!wallet.privateKey) {
@@ -242,7 +306,14 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     return bytesToHex(wallet.privateKey);
   }
 
-  // tx is an instance of the ethereumjs-transaction class.
+  /**
+   * Signs a transaction using the private key associated with the given address.
+   *
+   * @param address - The address to sign the transaction for.
+   * @param transaction - The transaction to sign.
+   * @param options - Additional options for signing the transaction.
+   * @returns A promise that resolves to the signed transaction data.
+   */
   async signTransaction(
     address: Hex,
     transaction: TypedTransaction,
@@ -255,7 +326,15 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     return signedTx === undefined ? transaction : signedTx;
   }
 
-  // For eth_sign, we need to sign arbitrary data:
+  /**
+   * Signs a message with the private key associated with the given address.
+   *
+   * @param address - The address to sign the message with.
+   * @param data - The message to sign.
+   * @param opts - Optional parameters for signing the message.
+   * @returns The raw message signature.
+   * @throws {Error} If the message is invalid and `validateMessage` is set to `true`.
+   */
   async signMessage(
     address: Hex,
     data: string,
@@ -281,7 +360,15 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     return rawMsgSig;
   }
 
-  // For personal_sign, we need to prefix the message:
+  /**
+   * Signs a personal message using the private key associated with the given address.
+   * **Note:** The message will be prefixed according to the Ethereum Signed Message standard.
+   *
+   * @param address - The Ethereum address to sign the message with.
+   * @param message - The message to sign.
+   * @param options - Additional options for signing the message.
+   * @returns A promise that resolves to the signature of the message.
+   */
   async signPersonalMessage(
     address: Hex,
     message: Hex,
@@ -293,7 +380,14 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     return signature;
   }
 
-  // For eth_decryptMessage:
+  /**
+   * Decrypts a message using the private key associated with the specified account.
+   *
+   * @param withAccount - The account for which to decrypt the message.
+   * @param encryptedData - The encrypted data to be decrypted.
+   * @returns The decrypted message.
+   * @throws {Error} If the private key is missing.
+   */
   async decryptMessage(
     withAccount: Hex,
     encryptedData: Eip1024EncryptedData,
@@ -308,7 +402,14 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     return signature;
   }
 
-  // personal_signTypedData, signs data along with the schema
+  /**
+   * Signs the provided typed data using the specified account's private key.
+   *
+   * @param withAccount - The account to sign the typed data with.
+   * @param typedData - The typed data to be signed.
+   * @param opts - Optional parameters for signing the typed data.
+   * @returns A promise that resolves to the signature of the signed typed data.
+   */
   async signTypedData(
     withAccount: Hex,
     typedData: Record<string, unknown> | TypedDataV1 | TypedMessage<any>,
@@ -333,6 +434,11 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     });
   }
 
+  /**
+   * Removes an account from the HDKeyring.
+   * @param account - The account to be removed.
+   * @throws {Error} If the account is not found or if the public key is missing.
+   */
   removeAccount(account: Hex): void {
     const address = account;
     if (
@@ -359,7 +465,14 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     });
   }
 
-  // get public key for nacl
+  /**
+   * Retrieves the encryption public key for a given account.
+   * Get public key for nacl.
+   *
+   * @param withAccount - The account for which to retrieve the encryption public key.
+   * @param opts - Additional options for retrieving the encryption public key.
+   * @returns The encryption public key as a string.
+   */
   async getEncryptionPublicKey(
     withAccount: Hex,
     opts: KeyringOpt = {},
@@ -371,6 +484,14 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     return publicKey;
   }
 
+  /**
+   * Retrieves the private key for a given address.
+   *
+   * @param address - The address for which to retrieve the private key.
+   * @param opts - Optional parameters for keyring.
+   * @returns The private key as a Uint8Array.
+   * @throws {Error} If the address is not provided or if the private key is missing.
+   */
   #getPrivateKeyFor(address: Hex, opts: KeyringOpt = {}): Uint8Array {
     if (!address) {
       throw new Error(HDKeyringErrors.AddressNotProvided);
@@ -382,6 +503,15 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     return wallet.privateKey;
   }
 
+  /**
+   * Retrieves the HDKey wallet for the specified account address.
+   *
+   * @param address - The account address to retrieve the wallet for.
+   * @param opts - Optional parameters for retrieving the wallet.
+   * @returns The HDKey wallet for the specified account address.
+   * @throws {Error} If the public key is missing or no matching address is found.
+   * @throws {Error} If the private key is missing when `opts.withAppKeyOrigin` is provided.
+   */
   #getWalletForAccount(address: string, opts: KeyringOpt = {}): HDKey {
     const normalizedAddress = normalize(address);
     let wallet = this.#wallets.find(({ publicKey }) => {
@@ -450,7 +580,12 @@ export default class HDKeyring implements Keyring<SerializedHdKeyringState> {
     this.root = this.hdWallet.derive(this.hdPath);
   }
 
-  // small helper function to convert publicKey in Uint8Array form to a publicAddress as a hex
+  /**
+   * Converts a public key to an Ethereum address.
+   *
+   * @param publicKey - The public key to convert.
+   * @returns The Ethereum address corresponding to the public key.
+   */
   #addressfromPublicKey(publicKey: Uint8Array): Hex {
     // bufferToHex adds a 0x prefix
     const address = bufferToHex(
