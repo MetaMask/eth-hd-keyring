@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@ethereumjs/tx": "^4.0.1",
-    "@lavamoat/allow-scripts": "^2.3.1",
+    "@lavamoat/allow-scripts": "^3.0.4",
     "@lavamoat/preinstall-always-fail": "^1.0.0",
     "@metamask/auto-changelog": "^2.5.0",
     "@metamask/bip39": "^4.0.0",
