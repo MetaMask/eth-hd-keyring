@@ -54,7 +54,7 @@
   },
   "packageManager": "yarn@3.3.0",
   "engines": {
-    "node": "^16.20 || ^18.16 || >=20"
+    "node": "^18.18 || ^20.14 || >=22"
   },
   "publishConfig": {
     "access": "public",
